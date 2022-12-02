@@ -1,5 +1,5 @@
 # cumplidos-dve-cliente
-✔️ Check: cliente para el nuevo sistema de Cumplidos Dve.
+✔️ Check: cliente para el nuevo sistema de Cumplidos Dve. 
 
 ## Especificaciones Técnicas
 
