@@ -31,6 +31,7 @@ import { Ng2SmartTableModule } from 'ng2-smart-table';
 import { UtilService } from './services/utilService';
 import { UserService } from './services/userService';
 import { InterceptorService } from '../loader/interceptor.service';
+import { CargaDocumentosDocenteComponent } from './carga-documentos-docente/carga-documentos-docente.component';
 
 
 const pagesComponents = [
@@ -60,6 +61,7 @@ const materialModules = [
   declarations: [
     ...pagesComponents,
     OasGridColsDirective,
+    CargaDocumentosDocenteComponent,
   ],
   imports: [
     HttpClientModule,
