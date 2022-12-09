@@ -1,4 +1,4 @@
-# cumplidos-dve-cliente
+# cumplidos_dve_cliente
 ✔️ Check: cliente para el nuevo sistema de Cumplidos Dve. 
 
 ## Especificaciones Técnicas
@@ -19,9 +19,9 @@ AWS_SECRET_ACCESS_KEY: Secreto de Usuario AWS
 Clonar el proyecto del repositorio de git
 ```bash
 # clone the project
-git clone https://github.com/udistrital/cumplidos-dve-cliente.git
+git clone https://github.com/udistrital/cumplidos_dve_cliente.git
 # enter the project directory
-cd cumplidos-dve-cliente
+cd cumplidos_dve_cliente
 ```
 Iniciar el servidor en local
 ```bash
@@ -68,15 +68,15 @@ npm run test:ui
 
 | Develop | Relese 0.0.1 | Master |
 | -- | -- | -- |
-| [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/cumplidos-dve-cliente/status.svg?ref=refs/heads/develop)](https://hubci.portaloas.udistrital.edu.co/udistrital/cumplidos-dve-cliente) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/cumplidos-dve-cliente/status.svg?ref=refs/heads/release/0.0.1)](https://hubci.portaloas.udistrital.edu.co/udistrital/cumplidos-dve-cliente) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/cumplidos-dve-cliente/status.svg?ref=refs/heads/master)](https://hubci.portaloas.udistrital.edu.co/udistrital/cumplidos-dve-cliente) |
+| [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/cumplidos_dve_cliente/status.svg?ref=refs/heads/develop)](https://hubci.portaloas.udistrital.edu.co/udistrital/cumplidos_dve_cliente) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/cumplidos_dve_cliente/status.svg?ref=refs/heads/release/0.0.1)](https://hubci.portaloas.udistrital.edu.co/udistrital/cumplidos_dve_cliente) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/cumplidos_dve_cliente/status.svg?ref=refs/heads/master)](https://hubci.portaloas.udistrital.edu.co/udistrital/cumplidos_dve_cliente) |
 
 ## Licencia
 
 [This file is part of sga_cliente.](LICENSE)
 
-cumplidos-dve-cliente is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (atSara Sampaio your option) any later version.
+cumplidos_dve_cliente is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (atSara Sampaio your option) any later version.
 
-cumplidos-dve-cliente is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+cumplidos_dve_cliente is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with cumplidos-dve-cliente. If not, see https://www.gnu.org/licenses/.
+You should have received a copy of the GNU General Public License along with cumplidos_dve_cliente. If not, see https://www.gnu.org/licenses/.
 
