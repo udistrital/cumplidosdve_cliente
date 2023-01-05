@@ -32,6 +32,7 @@ import { UtilService } from './services/utilService';
 import { UserService } from './services/userService';
 import { InterceptorService } from '../loader/interceptor.service';
 import { CargaDocumentosDocenteComponent } from './carga-documentos-docente/carga-documentos-docente.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 
 const pagesComponents = [
@@ -70,7 +71,8 @@ const materialModules = [
     ReactiveFormsModule,
     PagesRoutingModule,
     Ng2SmartTableModule,
-    ...materialModules
+    MatDialogModule,
+    ...materialModules,
   ],
   providers: [
     RequestManager,
