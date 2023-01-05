@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+
 import { Injectable } from '@angular/core';
 import Swal from 'sweetalert2';
 
@@ -8,6 +8,36 @@ import Swal from 'sweetalert2';
 export class UtilService {
 
     constructor() { }
+
+    loading(): void{
+        Swal.fire({
+            title: 'Cargando...',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+        });
+        Swal.showLoading();
+    }
+
+    close(): void {
+        Swal.close();
+    }
+
+    warning(texto: string): Promise<any> {
+        return Swal.fire({
+            title: 'Atención',
+            text: texto,
+            icon: 'warning',
+        });
+    }
+
+    error(texto: string): Promise<any> {
+        return Swal.fire({
+            title: 'Error',
+            text: texto,
+            icon: 'error',
+        });
+    }
 
     submitAlert({ option, type, fn, data, info, fnReturn }) {
         Swal.fire({
