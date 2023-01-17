@@ -23,6 +23,14 @@ export class UtilService {
         Swal.close();
     }
 
+    success(texto: string): Promise<any> {
+        return Swal.fire({
+            title: 'Exito!',
+            text: texto,
+            icon: 'success',
+        });
+    }
+
     warning(texto: string): Promise<any> {
         return Swal.fire({
             title: 'Atención',
