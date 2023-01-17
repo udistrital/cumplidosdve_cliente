@@ -33,6 +33,7 @@ import { UserService } from './services/userService';
 import { InterceptorService } from '../loader/interceptor.service';
 import { CargaDocumentosDocenteComponent } from './carga-documentos-docente/carga-documentos-docente.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import { CreacionCumplidosDocenteComponent } from './creacion-cumplidos-docente/creacion-cumplidos-docente.component';
 
 
 const pagesComponents = [
@@ -63,6 +64,7 @@ const materialModules = [
     ...pagesComponents,
     OasGridColsDirective,
     CargaDocumentosDocenteComponent,
+    CreacionCumplidosDocenteComponent,
   ],
   imports: [
     HttpClientModule,

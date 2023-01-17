@@ -6,6 +6,8 @@ import { environment } from 'src/environments/environment';
 import { RequestManager } from '../services/requestManager';
 import { UserService } from '../services/userService';
 import { UtilService } from '../services/utilService';
+import { Router, ActivatedRoute } from '@angular/router';
+import { CargaDocumentosDocenteService } from '../services/carga-documentos-docente.service';
 
 @Component({
   selector: 'app-carga-documentos-docente',
@@ -24,7 +26,10 @@ export class CargaDocumentosDocenteComponent implements OnInit {
   constructor(
     private request: RequestManager,
     private popUp: UtilService,
+    private router: Router,
+    private route: ActivatedRoute,
     private userService: UserService,
+    private servicioCargaDocumentosDocente: CargaDocumentosDocenteService
   ) {
     this.initTable();
   }
@@ -47,13 +52,13 @@ export class CargaDocumentosDocenteComponent implements OnInit {
         columnTitle: 'Acciones',
         custom: [
           {
-            name: 'documento',
-            title: '<em class="material-icons" title="Crear Solicitud">note_add</em>'
+            name: 'acciones',
+            title: '<em title="Solicitar Cumplido"><button mat-button type="button"><i class="fa-solid fa-upload"></i></button></em>',
           },
         ],
       },
       selectedRowIndex: -1,
-      noDataMessage: 'No hay contratos del docente',
+      noDataMessage: 'No hay contratos asociados al docente',
     };
   }
 
@@ -85,5 +90,10 @@ export class CargaDocumentosDocenteComponent implements OnInit {
         this.popUp.error('No se han podido consultar los contratos del docente.');
       }
     });
+  }
+
+  CreacionCumplidosDocente(event): void {
+    this.servicioCargaDocumentosDocente.SendData(event.data)
+    this.router.navigate(["../creacion_cumplidos_docente"], {relativeTo: this.route});
   }
 }

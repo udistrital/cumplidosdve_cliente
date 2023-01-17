@@ -1,0 +1,40 @@
+<mat-card class="card-oas">
+    <mat-card-title class="cumplidos-dve-title">
+        <h2>Solicitar Cumplido</h2>
+    </mat-card-title>
+    <mat-card-content>
+        <form class="formulario">
+            <mat-form-field class="año" appearance="outline">
+                <mat-label>AÑO</mat-label>
+                <mat-select [(value)]="AnoSeleccionado">
+                    <mat-option [value]="ano" *ngFor="let ano of Data_Anos">{{ano}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field class="mes" appearance="outline">
+                <mat-label>MES</mat-label>
+                <mat-select [(value)]="MesSeleccionado">
+                    <mat-option [value]="mes" *ngFor="let mes of Data_Anos_Meses[AnoSeleccionado]">{{mes}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </form>
+        <mat-card class="message">
+            <mat-card-header class="title">
+                <mat-card-title>
+                    <h5>Estimado(a) Docente:</h5>
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="content">
+                <h5>Seleccione el mes y año de la solicitud de cumplido que va a realizar. Tenga en cuenta que al hacer click en
+                    el boton de crear solicitud usted manifiesta que ha cumplido con las actividades como docente de vinculación
+                    especial para el mes y año seleccionado. Esta acción genera una solicitud al coordinador del proyecto
+                    curricular para gestionar el visto bueno y el pago correspondiente.
+                </h5>
+            </mat-card-content>
+            <mat-card-footer>
+                <h5>NOTA: Debe hacer la solicitud por cada proyecto curricular donde desarrolló sus actividades.</h5>
+            </mat-card-footer>
+        </mat-card>
+        <button mat-raised-button class="send" (click)="CrearSolicitud()"> Crear Solicitud </button>
+        <ng2-smart-table class="table" [settings]="CumplidosSettings" [source]="CumplidosData"></ng2-smart-table>
+    </mat-card-content>
+</mat-card>
