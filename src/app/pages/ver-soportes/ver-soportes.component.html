@@ -1,0 +1,25 @@
+<mat-card class="card-oas">
+    <mat-card-title class="ver-soportes-title">
+        <button mat-icon-button class="button-close" type="button" (click)="Cerrar()"><i class="fa-solid fa-square-xmark"></i></button>
+    </mat-card-title>
+    <mat-card-content class="ver-soportes-content">
+        <mat-card class="card-oas">
+            <mat-card-title class="ver-soportes-title-2">
+                <h3>Ver Soportes</h3>
+            </mat-card-title>
+            <mat-card-content class="ver-soportes-content-2">
+                <h3>A continuación se listan los soportes asociados al cumplido.</h3>
+                <mat-card class="card-oas" id="documentos" *ngFor="let documento of documentos">
+                    <mat-card-title>{{documento.Nombre}}</mat-card-title>
+                    <mat-card-content>
+                        <h5>{{documento.Descripcion}}</h5>
+                        <textarea placeholder="{{documento.TipoDocumento.Descripcion}}" rows="10" cols="120" disabled></textarea>
+                        <div class="button-ver">
+                            <button mat-icon-button type="button" (click)="VerDocumento()">VER DOCUMENTO</button>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </mat-card-content>
+        </mat-card>
+    </mat-card-content>
+</mat-card>

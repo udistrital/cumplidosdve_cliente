@@ -20,6 +20,7 @@ export const environment = {
   CUMPLIDOS_DVE_MID_SERVICE: 'https://autenticacion.portaloas.udistrital.edu.co/apioas/cumplidos_dve_mid/v1/',
   CUMPLIDOS_DVE_CRUD_SERVICE: 'https://autenticacion.portaloas.udistrital.edu.co/apioas/cumplidos_dve_crud/v1/',
   ADMINISTRATIVA_AMAZON_SERVICE: 'https://autenticacion.portaloas.udistrital.edu.co/apioas/administrativa_amazon_api/v1/',
+  CORE_SERVICE: 'https://autenticacion.portaloas.udistrital.edu.co/apioas/core_api/v1/',
   TOKEN: {
     AUTORIZATION_URL: 'https://autenticacion.portaloas.udistrital.edu.co/oauth2/authorize',
     CLIENTE_ID: 'e36v1MPQk2jbz9KM4SmKhk8Cyw0a',
