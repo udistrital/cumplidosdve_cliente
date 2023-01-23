@@ -8,6 +8,9 @@ import { environment } from 'src/environments/environment';
 import { Respuesta } from 'src/app/@core/models/respuesta';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../services/userService';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { VerSoportesComponent } from '../ver-soportes/ver-soportes.component';
+import { VerSoportesService } from '../services/ver-soportes.service';
 
 @Component({
   selector: 'app-creacion-cumplidos-docente',
@@ -18,6 +21,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
 
   //SETTINGS
   CumplidosSettings: any;
+  DialogConfig: MatDialogConfig;
 
   //DATA
   CumplidosData: LocalDataSource;
@@ -28,6 +32,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
   Data_Ano_Enviado: any = 0;
 
   //VARIABLES
+  resultado = [];
   information: any;
   contrato: any={};
   Ano_Inicial: any;
@@ -44,11 +49,13 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
 
   constructor(
     private request: RequestManager,
+    private dialog: MatDialog,
     private popUp: UtilService,
     private router: Router,
     private route: ActivatedRoute,
     private userService: UserService,
-    private servicioCargaDocumentosDocente: CargaDocumentosDocenteService
+    private servicioCargaDocumentosDocente: CargaDocumentosDocenteService,
+    private servicioVerSoportes: VerSoportesService
   ) {
     this.initTable();
     this.Mes = {1:"ENERO", 2:"FEBRERO", 3:"MARZO", 4:"ABRIL", 5:"MAYO", 6:"JUNIO", 7:"JULIO", 8:"AGOSTO", 9:"SEPTIEMBRE", 10:"OCTUBRE", 11:"NOVIEMBRE", 12:"DICIEMBRE"}
@@ -62,6 +69,12 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
       this.consultarNumeroDocumento();
       this.ConsultarCumplidos();
       this.ConsultarActaInicio();
+
+      //MatDialogConfig
+      this.DialogConfig = new MatDialogConfig();
+      this.DialogConfig.width = '1200px';
+      this.DialogConfig.height = '800px';
+      this.DialogConfig.data = {};
     }
   }
 
@@ -79,7 +92,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
         custom: [
           {
             name: 'acciones',
-            title: '<em title="Ver Cumplido"><button mat-button type="button"><i class="fa-regular fa-folder-open"></i></button></em>',
+            title: '<em title="Ver Soportes"><button mat-button type="button"><i class="fa-regular fa-folder-open"></i></button></em>',
           }
         ],
       },
@@ -111,7 +124,9 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
         if (response.Success){
           this.popUp.close();
           if (response.Data[0].hasOwnProperty('NumeroContrato')){
-            this.CumplidosData = new LocalDataSource(response.Data);
+            this.CambioEstado(response.Data);
+            this.CumplidosData = new LocalDataSource(this.resultado);
+            console.log("Resultado: ", this.CumplidosData);
           }
         }
       }, error: () => {
@@ -227,6 +242,22 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
           console.log("No se ha podido consultar si existe el cumplido");
         }
       });
+    }
+  }
+
+  VerSoportes(event): void {
+    this.servicioVerSoportes.SendData(event.data)
+    this.dialog.open(VerSoportesComponent, this.DialogConfig);
+  }
+
+  CambioEstado(Datos: any): void{;
+    for(let dato of Datos){
+      this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=Id:${dato.EstadoPagoMensualId}`).subscribe({
+        next: (response: Respuesta) => {
+          dato.EstadoPagoMensualId = response.Data[0].Nombre;
+        }
+      })
+      this.resultado.push(dato)
     }
   }
 }

@@ -34,6 +34,7 @@ import { InterceptorService } from '../loader/interceptor.service';
 import { CargaDocumentosDocenteComponent } from './carga-documentos-docente/carga-documentos-docente.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { CreacionCumplidosDocenteComponent } from './creacion-cumplidos-docente/creacion-cumplidos-docente.component';
+import { VerSoportesComponent } from './ver-soportes/ver-soportes.component';
 
 
 const pagesComponents = [
@@ -65,6 +66,7 @@ const materialModules = [
     OasGridColsDirective,
     CargaDocumentosDocenteComponent,
     CreacionCumplidosDocenteComponent,
+    VerSoportesComponent,
   ],
   imports: [
     HttpClientModule,
