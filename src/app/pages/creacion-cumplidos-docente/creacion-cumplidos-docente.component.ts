@@ -1,4 +1,4 @@
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { TablaCumplidos } from 'src/app/@core/models/tabla_cumplidos';
 import { UtilService } from '../services/utilService';
 import { LocalDataSource } from 'ng2-smart-table';
@@ -17,6 +17,9 @@ import { VerSoportesService } from '../services/ver-soportes.service';
   templateUrl: './creacion-cumplidos-docente.component.html',
   styleUrls: ['./creacion-cumplidos-docente.component.scss']
 })
+
+
+
 export class CreacionCumplidosDocenteComponent implements OnInit {
 
   //SETTINGS
@@ -32,7 +35,6 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
   Data_Ano_Enviado: any = 0;
 
   //VARIABLES
-  resultado = [];
   information: any;
   contrato: any={};
   Ano_Inicial: any;
@@ -55,7 +57,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
     private route: ActivatedRoute,
     private userService: UserService,
     private servicioCargaDocumentosDocente: CargaDocumentosDocenteService,
-    private servicioVerSoportes: VerSoportesService
+    private servicioVerSoportes: VerSoportesService,
   ) {
     this.initTable();
     this.Mes = {1:"ENERO", 2:"FEBRERO", 3:"MARZO", 4:"ABRIL", 5:"MAYO", 6:"JUNIO", 7:"JULIO", 8:"AGOSTO", 9:"SEPTIEMBRE", 10:"OCTUBRE", 11:"NOVIEMBRE", 12:"DICIEMBRE"}
@@ -91,14 +93,23 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
         columnTitle: 'Acciones',
         custom: [
           {
-            name: 'acciones',
+            name: 'Ver-Soportes',
             title: '<em title="Ver Soportes"><button mat-button type="button"><i class="fa-regular fa-folder-open"></i></button></em>',
-          }
+          },
+          {
+            name: 'Enviar-Cumplido',
+            title: '<em title="Enviar" class="enviar-cumplido"><button mat-button type="button"><i id="enviar" class="fas fa-paper-plane"></i></button></em>',
+          },
         ],
+      },
+      rowClassFunction: (row) => {
+        if(row.data.EstadoPagoMensualId == "POR REVISAR SUPERVISOR" || row.data.EstadoPagoMensualId == "APROBADO SUPERVISOR" || row.data.EstadoPagoMensualId == "APROBACIÓN PAGO" || row.data.EstadoPagoMensualId == "POR REVISAR COORDINADOR(A)" || row.data.EstadoPagoMensualId == "POR APROBAR DECANO(A)" || row.data.EstadoPagoMensualId == "APROBADO DECANO(A)"){
+          return 'borrar';
+        }
       },
       selectedRowIndex: -1,
       noDataMessage: 'No hay cumplidos asociados al docente',
-    };
+    }
   }
 
   RecibirData(): void {
@@ -112,11 +123,10 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
     this.popUp.loading();
     this.userService.user$.subscribe((data: any) => {
       if(data ? data.userService ? data.userService.documento ? true : false : false : false){
-        this.documentoDocente = data.userService.documento
+        this.documentoDocente = data.userService.documento;
       }
     })
   }
-
   ConsultarCumplidos(): void {
     this.popUp.loading();
     this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=numero_contrato:${this.information.NumeroVinculacion},vigencia_contrato:${this.information.Vigencia}`).subscribe({
@@ -124,9 +134,8 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
         if (response.Success){
           this.popUp.close();
           if (response.Data[0].hasOwnProperty('NumeroContrato')){
-            this.CambioEstado(response.Data);
-            this.CumplidosData = new LocalDataSource(this.resultado);
-            console.log("Resultado: ", this.CumplidosData);
+            this.CumplidosData = new LocalDataSource(response.Data);
+            this.CambioEstado(this.CumplidosData);
           }
         }
       }, error: () => {
@@ -169,12 +178,6 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
     
   }
 
-  TomarTiempo(): string {
-    var tiempo_actual = "";
-    tiempo_actual = (new Date().getFullYear()) + "-" + ((new Date().getMonth()) + 1) + "-" + (new Date().getDate()) + " " + (new Date().getHours()) + ":" + (new Date().getMinutes()) + ":" + (new Date().getSeconds()) + "." + (new Date().getMilliseconds());
-    return tiempo_actual;
-  }
-
   CrearSolicitud(): void {
     //VALIDA SI LOS CAMPOS ESTAN VACIOS
     if(this.MesSeleccionado == 0 || this.AnoSeleccionado == 0){
@@ -212,8 +215,8 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
                     Persona: this.documentoDocente,
                     EstadoPagoMensualId: this.Parametro[0].Id,
                     Responsable: this.documentoDocente,
-                    FechaCreacion: this.TomarTiempo(),
-                    FechaModificacion: this.TomarTiempo(),
+                    FechaCreacion: new Date().toLocaleString("sv-SE"),
+                    FechaModificacion: new Date().toLocaleString("sv-SE"),
                     CargoResponsable: "DOCENTE",
                     Ano: this.AnoSeleccionado
                   }
@@ -222,7 +225,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
                   this.request.post(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, this.pago_mensual).subscribe({
                     next: (response: Respuesta) => {
                       if(response.Success){
-                        this.popUp.close()
+                        this.popUp.close();
                         this.popUp.success("Su solicitud de cumplido ha sido creada.").then(() => {
                           this.ngOnInit()
                         });
@@ -245,19 +248,82 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
     }
   }
 
+  Acciones(event): void {
+    switch(event.action){
+      case "Ver-Soportes":{
+        this.VerSoportes(event);
+        break;
+      }
+      case "Enviar-Cumplido":{
+        this.EnviarCumplido(event);
+      }
+    }
+  }
+  
   VerSoportes(event): void {
     this.servicioVerSoportes.SendData(event.data)
     this.dialog.open(VerSoportesComponent, this.DialogConfig);
   }
 
-  CambioEstado(Datos: any): void{;
-    for(let dato of Datos){
+  EnviarCumplido(event): void {
+    this.popUp.confirm("Enviar Cumplido", "¿Desea hacer el envío del cumplido para su revisión?", "send").then(result => {
+      if(result.isConfirmed){
+        //VARIABLES
+        var cumplido = event.data;
+        var parametro : any;
+
+        //CONSULTAR PAGO MENSUAL
+        this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=Id:${event.data.Id}`).subscribe({
+          next:(response: Respuesta) => {
+            if(response.Success){
+              cumplido = response.Data[0];
+
+              //CONSULTA EL PARAMETRO
+              this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PRC,Nombre:POR REVISAR COORDINADOR(A)`).subscribe({
+                next: (response: Respuesta) => {
+                  if (response.Success) {
+                    parametro = response.Data;
+                    if ((response.Data as any[]).length === 0) {
+                      console.log("No se ha encontrado el parametro.");
+                    }
+
+                    //CAMBIA EL ESTADO Y AJUSTA VALORES
+                    cumplido.EstadoPagoMensualId = parametro[0].Id;
+                    cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
+                    cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
+
+                    //ENVIA LA SOLICITUD
+                    this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.Id).subscribe({
+                      next: (response2: Respuesta) => {
+                        if (response2.Success) {
+                          this.popUp.close();
+                          this.popUp.success("El cumplido ha sido enviado.").then(() => {
+                            this.ngOnInit();
+                          });
+                        }
+                      }, error: () => {
+                        this.popUp.error("No se pudo enviar el cumplido.")
+                      }
+                    });
+                  }
+                }, error: () => {
+                  console.log("No se ha podido consultar el parametro.");
+                }
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+
+  CambioEstado(Datos: any): void {
+    for(let dato of Datos.data){
       this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=Id:${dato.EstadoPagoMensualId}`).subscribe({
         next: (response: Respuesta) => {
           dato.EstadoPagoMensualId = response.Data[0].Nombre;
         }
       })
-      this.resultado.push(dato)
     }
   }
 }

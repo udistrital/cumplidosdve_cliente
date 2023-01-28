@@ -47,6 +47,17 @@ export class UtilService {
         });
     }
 
+    confirm(titulo: string, texto: string, option: string): Promise<any> {
+        return Swal.fire({
+            title: titulo,
+            text: texto,
+            icon: 'question',
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar',
+            confirmButtonText: `${option === 'send' ? 'Enviar' : "Eliminar" }`,
+        });
+    }
+
     submitAlert({ option, type, fn, data, info, fnReturn }) {
         Swal.fire({
             title: `Se ${option === 'update' ? 'actualizará' : 'creará'} ${type}`,
