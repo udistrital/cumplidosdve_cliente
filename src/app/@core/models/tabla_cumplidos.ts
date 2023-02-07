@@ -31,5 +31,12 @@ export const TablaCumplidos: any ={
         width: '15%',
         editable: false,
         filter: false,
+        valuePrepareFunction: (data) => {
+            if(typeof data === 'number'){
+                return '';
+            }else{
+                return data;
+            }
+        }
     },
 }

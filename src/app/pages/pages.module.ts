@@ -35,6 +35,7 @@ import { CargaDocumentosDocenteComponent } from './carga-documentos-docente/carg
 import { MatDialogModule } from '@angular/material/dialog';
 import { CreacionCumplidosDocenteComponent } from './creacion-cumplidos-docente/creacion-cumplidos-docente.component';
 import { VerSoportesComponent } from './ver-soportes/ver-soportes.component';
+import { AprobacionCoordinadorComponent } from './aprobacion-coordinador/aprobacion-coordinador.component';
 
 
 const pagesComponents = [
@@ -67,6 +68,7 @@ const materialModules = [
     CargaDocumentosDocenteComponent,
     CreacionCumplidosDocenteComponent,
     VerSoportesComponent,
+    AprobacionCoordinadorComponent,
   ],
   imports: [
     HttpClientModule,
