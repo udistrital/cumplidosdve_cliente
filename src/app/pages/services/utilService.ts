@@ -54,7 +54,7 @@ export class UtilService {
             icon: 'question',
             showCancelButton: true,
             cancelButtonText: 'Cancelar',
-            confirmButtonText: `${option === 'send' ? 'Enviar' : "Eliminar" }`,
+            confirmButtonText: `${option === 'send' ? 'Enviar' : option === 'aprobar' ? 'Aprobar' : option === 'rechazar' ? 'Rechazar' : "Eliminar" }`,
         });
     }
 

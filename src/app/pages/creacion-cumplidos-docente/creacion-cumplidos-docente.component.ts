@@ -132,10 +132,13 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
     this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=numero_contrato:${this.information.NumeroVinculacion},vigencia_contrato:${this.information.Vigencia}`).subscribe({
       next: (response: Respuesta) => {
         if (response.Success){
-          this.popUp.close();
           if (response.Data[0].hasOwnProperty('NumeroContrato')){
             this.CumplidosData = new LocalDataSource(response.Data);
             this.CambioEstado(this.CumplidosData);
+            setTimeout(() => {
+              this.CumplidosData.setSort([{field: 'Mes', direction: 'desc'}],true);
+              this.popUp.close();
+            }, 3000);
           }
         }
       }, error: () => {
@@ -198,7 +201,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
               this.popUp.error("Existe el cumplido seleccionado.")
             }else{
               //CONSULTAR PARAMETRO
-              this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:CD,Nombre:CARGANDO DOCUMENTOS`).subscribe({
+              this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:CD_DVE,Nombre:CARGANDO DOCUMENTOS`).subscribe({
                 next: (response2: Respuesta) => {
                   if(response2.Success){
                     this.Parametro = response2.Data;
@@ -279,7 +282,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
               cumplido = response.Data[0];
 
               //CONSULTA EL PARAMETRO
-              this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PRC,Nombre:POR REVISAR COORDINADOR(A)`).subscribe({
+              this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PRC_DVE,Nombre:POR REVISAR COORDINADOR(A)`).subscribe({
                 next: (response: Respuesta) => {
                   if (response.Success) {
                     parametro = response.Data;

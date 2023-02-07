@@ -4,6 +4,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { PagesComponent } from './pages.component';
 import { CargaDocumentosDocenteComponent } from './carga-documentos-docente/carga-documentos-docente.component'
 import { CreacionCumplidosDocenteComponent } from './creacion-cumplidos-docente/creacion-cumplidos-docente.component';
+import { AprobacionCoordinadorComponent } from './aprobacion-coordinador/aprobacion-coordinador.component';
 
 const routes: Routes = [{
   path: '',
@@ -23,6 +24,10 @@ const routes: Routes = [{
     {
       path: 'creacion_cumplidos_docente',
       component: CreacionCumplidosDocenteComponent,
+    },
+    {
+      path: 'aprobacion_coordinador',
+      component: AprobacionCoordinadorComponent,
     }
   ]
     

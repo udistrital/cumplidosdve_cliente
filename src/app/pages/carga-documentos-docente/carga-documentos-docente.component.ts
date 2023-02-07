@@ -17,7 +17,6 @@ import { CargaDocumentosDocenteService } from '../services/carga-documentos-doce
 
 export class CargaDocumentosDocenteComponent implements OnInit {
 
-  icono: string;
   CargaDocumentosDocentesSettings : any;
   CargaDocumentosDocenteData: LocalDataSource;
   NombreDocente = '';
