@@ -48,6 +48,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
   Parametro:any = [];
   pago_mensual:any = [];
   documentoDocente = '';
+  coordinador : any ;
 
   constructor(
     private request: RequestManager,
@@ -162,6 +163,16 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
     })
   }
 
+  ConsultarCoordinador(): void {
+    this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `informacion_academica/informacion_coordinador/${this.information.IdDependencia}`).subscribe({
+      next: (response:Respuesta) => {
+        if(response.Success){
+          this.coordinador = response.Data;
+        }
+      }
+    });
+  }
+
   CargarMesesYDias(): void {
     this.Ano_Inicial = new Date(this.contrato[0].FechaInicio).getFullYear();
     this.Ano_Final = new Date(this.contrato[0].FechaFin).getFullYear();
@@ -274,6 +285,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
         //VARIABLES
         var cumplido = event.data;
         var parametro : any;
+        this.ConsultarCoordinador();
 
         //CONSULTAR PAGO MENSUAL
         this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=Id:${event.data.Id}`).subscribe({
@@ -291,6 +303,8 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
                     }
 
                     //CAMBIA EL ESTADO Y AJUSTA VALORES
+                    cumplido.Responsable = this.coordinador.carreraSniesCollection.carreraSnies[0].numero_documento_coordinador
+                    cumplido.CargoResponsable = "COORDINADOR";
                     cumplido.EstadoPagoMensualId = parametro[0].Id;
                     cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
                     cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
