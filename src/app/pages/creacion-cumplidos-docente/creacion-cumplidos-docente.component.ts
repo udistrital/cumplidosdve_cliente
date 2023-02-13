@@ -241,7 +241,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
                       if(response.Success){
                         this.popUp.close();
                         this.popUp.success("Su solicitud de cumplido ha sido creada.").then(() => {
-                          this.ngOnInit()
+                          this.ngOnInit();
                         });
                       }
                     }, error: () => {

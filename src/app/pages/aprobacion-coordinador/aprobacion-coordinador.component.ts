@@ -21,6 +21,8 @@ export class AprobacionCoordinadorComponent implements OnInit {
   PeticionesData: LocalDataSource;
   NombreCoordinador = '';
   documentoCoordinador = '';
+  CumplidosSelected : any = [];
+
   constructor(
     private request: RequestManager,
     private popUp: UtilService,
@@ -37,6 +39,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
 
   initTable(): void {
     this.PeticionesSettings = {
+      selectMode: 'multi',
       columns: TablaPeticiones,
       mode: 'external',
       actions: {
@@ -91,7 +94,6 @@ export class AprobacionCoordinadorComponent implements OnInit {
         next: (response: Respuesta) => {
           if(response.Success){
             this.PeticionesData = new LocalDataSource(response.Data);
-            console.log(this.PeticionesData);
             if((response.Data as any).length === 0){
               console.log("No se han encontrado peticiones.");
             }
@@ -138,6 +140,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
                     }
 
                     //CAMBIA EL ESTADO Y AJUSTA VALORES
+                    cumplido.CargoResponsable = "SUPERVISOR";
                     cumplido.EstadoPagoMensualId = parametro[0].Id;
                     cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
                     cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
@@ -190,6 +193,8 @@ export class AprobacionCoordinadorComponent implements OnInit {
                     }
 
                     //CAMBIA EL ESTADO Y AJUSTA VALORES
+                    cumplido.Responsable = cumplido.persona;
+                    cumplido.CargoResponsable = "DOCENTE";
                     cumplido.EstadoPagoMensualId = parametro[0].Id;
                     cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
                     cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
@@ -213,6 +218,49 @@ export class AprobacionCoordinadorComponent implements OnInit {
                 }
               });
             }
+          }
+        });
+      }
+    });
+  }
+
+  CumplidosSeleccionados(event): void {
+    //VARIABLES
+    var parametro : any;
+
+    this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PRS_DVE,Nombre:POR REVISAR SUPERVISOR`).subscribe({
+      next: (response: Respuesta) => {
+        if(response.Success){
+          parametro = response.Data;
+          if((response.Data as any[]).length === 0){
+            console.log("No se ha encontrado el parametro.");
+          }
+          //SE CREA EL ARRAY CON LOS DATOS
+          for(var i=0; i<event.selected.length;i++){
+            this.CumplidosSelected[i] = event.selected[i].PagoMensual;
+            this.CumplidosSelected[i].CargoResponsable = "SUPERVISOR";
+            this.CumplidosSelected[i].EstadoPagoMensualId = parametro[0].Id;
+            this.CumplidosSelected[i].FechaCreacion = new Date(this.CumplidosSelected[i].FechaCreacion).toLocaleString("sv-SE");
+            this.CumplidosSelected[i].FechaModificacion = new Date().toLocaleString("sv-SE");
+          }
+        }
+      }
+    });
+  }
+
+  AprobarMultiplesCumplidos():void {
+    this.popUp.confirm("Aprobar Cumplidos", "¿Está seguro que desea dar el visto bueno a las solicitudes de cumplidos seleccionadas?", "send").then(result => {
+      if(result.isConfirmed){
+        this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/aprobar_documentos`, this.CumplidosSelected).subscribe({
+          next: (response: Respuesta) => {
+            if(response.Success){
+              this.popUp.close();
+              this.popUp.success("Los cumplidos seleccionados han sido aprobados.").then(() => {
+                this.ngOnInit();
+              });
+            }
+          }, error: () => {
+            this.popUp.error("No se ha podido aprobar los cumplidos seleccionados.");
           }
         });
       }
