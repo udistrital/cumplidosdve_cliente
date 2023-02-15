@@ -1,3 +1,4 @@
+import { analyzeAndValidateNgModules } from '@angular/compiler';
 import { Component, OnInit } from '@angular/core';
 import { LocalDataSource } from 'ng2-smart-table';
 import { Respuesta } from 'src/app/@core/models/respuesta';
@@ -21,6 +22,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
   PeticionesData: LocalDataSource;
   NombreCoordinador = '';
   documentoCoordinador = '';
+  documentoSupervisor: any;
   CumplidosSelected : any = [];
 
   constructor(
@@ -119,15 +121,16 @@ export class AprobacionCoordinadorComponent implements OnInit {
 
   Aprobar(event): void {
     this.popUp.confirm("Aprobar", "¿Está seguro que desea dar el visto bueno a la solicitud de cumplido?", "aprobar").then(result => {
-      if(result.isConfirmed){
+      if (result.isConfirmed) {
         //VARIABLES
-        var cumplido :any;
-        var parametro : any;
+        var cumplido: any;
+        var parametro: any;
+        var Supervisor: any;
 
         //CONSULTAR PAGO MENSUAL
         this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=Id:${event.data.PagoMensual.Id}`).subscribe({
-          next:(response: Respuesta) => {
-            if(response.Success){
+          next: (response: Respuesta) => {
+            if (response.Success) {
               cumplido = response.Data[0];
 
               //CONSULTAR EL PARAMETRO
@@ -139,23 +142,30 @@ export class AprobacionCoordinadorComponent implements OnInit {
                       console.log("No se ha encontrado el parametro.")
                     }
 
-                    //CAMBIA EL ESTADO Y AJUSTA VALORES
-                    cumplido.CargoResponsable = "SUPERVISOR";
-                    cumplido.EstadoPagoMensualId = parametro[0].Id;
-                    cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
-                    cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
+                    this.request.get(environment.ADMINISTRATIVA_JBPM_SERVICE, `contrato_elaborado/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
+                      next: (response: any) => {
+                        Supervisor = response.contrato.supervisor.documento_identificacion;
 
-                    //APRUEBA LA SOLICITUD
-                    this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
-                      next: (response: Respuesta) => {
-                        if(response.Success){
-                          this.popUp.close();
-                          this.popUp.success("El cumplido ha sido aprobado.").then(() => {
-                            this.ngOnInit();
-                          });
-                        }
-                      }, error: () => {
-                        this.popUp.error("No se ha podido aprobar el cumplido.");
+                        //CAMBIA EL ESTADO Y AJUSTA VALORES
+                        cumplido.Responsable = Supervisor;
+                        cumplido.CargoResponsable = "SUPERVISOR";
+                        cumplido.EstadoPagoMensualId = parametro[0].Id;
+                        cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
+                        cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
+
+                        //APRUEBA LA SOLICITUD
+                        this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
+                          next: (response: Respuesta) => {
+                            if (response.Success) {
+                              this.popUp.close();
+                              this.popUp.success("El cumplido ha sido aprobado.").then(() => {
+                                this.ngOnInit();
+                              });
+                            }
+                          }, error: () => {
+                            this.popUp.error("No se ha podido aprobar el cumplido.");
+                          }
+                        });
                       }
                     });
                   }
@@ -226,44 +236,72 @@ export class AprobacionCoordinadorComponent implements OnInit {
 
   CumplidosSeleccionados(event): void {
     //VARIABLES
-    var parametro : any;
+    var parametro: any;
+    var cumplido: any;
 
-    this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PRS_DVE,Nombre:POR REVISAR SUPERVISOR`).subscribe({
-      next: (response: Respuesta) => {
-        if(response.Success){
-          parametro = response.Data;
-          if((response.Data as any[]).length === 0){
-            console.log("No se ha encontrado el parametro.");
-          }
-          //SE CREA EL ARRAY CON LOS DATOS
-          for(var i=0; i<event.selected.length;i++){
-            this.CumplidosSelected[i] = event.selected[i].PagoMensual;
-            this.CumplidosSelected[i].CargoResponsable = "SUPERVISOR";
-            this.CumplidosSelected[i].EstadoPagoMensualId = parametro[0].Id;
-            this.CumplidosSelected[i].FechaCreacion = new Date(this.CumplidosSelected[i].FechaCreacion).toLocaleString("sv-SE");
-            this.CumplidosSelected[i].FechaModificacion = new Date().toLocaleString("sv-SE");
+    if(event.isSelected){
+      this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PRS_DVE,Nombre:POR REVISAR SUPERVISOR`).subscribe({
+        next: (response: Respuesta) => {
+          if(response.Success){
+            parametro = response.Data;
+            if ((response.Data as any[]).length === 0) {
+              console.log("No se ha encontrado el parametro.");
+            }
+            this.request.get(environment.ADMINISTRATIVA_JBPM_SERVICE, `contrato_elaborado/${event.data.PagoMensual.NumeroContrato}/${event.data.PagoMensual.VigenciaContrato}`).subscribe({
+              next: (response: any) => {
+                //SE CREA EL CUMPLIDO Y SE CAMBIAN VALORES
+                cumplido = event.data.PagoMensual;
+                cumplido.Responsable = response.contrato.supervisor.documento_identificacion;
+                cumplido.CargoResponsable = "SUPERVISOR";
+                cumplido.EstadoPagoMensualId = parametro[0].Id;
+                cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
+                cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
+                this.CumplidosSelected.push(cumplido);
+              }
+            });
           }
         }
+      });
+    }else{
+      //ELIMINA EL CUMPLIDO
+      for(var i = 0; i < this.CumplidosSelected.length; i++){
+        if(this.CumplidosSelected[i] != null && this.CumplidosSelected[i].Id == event.data.PagoMensual.Id){
+          delete this.CumplidosSelected[i];
+        }
       }
-    });
+      //VUELVE A ARMAR EL ARRAY SIN ESPACIOS EN BLANCO
+      var cont = 0;
+      var cumplidos_nuevo = [];
+      for(var i = 0; i < this.CumplidosSelected.length; i++){
+        if(this.CumplidosSelected[i] != null){
+          cumplidos_nuevo[cont] = this.CumplidosSelected[i];
+          cont++;
+        }
+      }
+      this.CumplidosSelected = cumplidos_nuevo;
+    }
   }
 
   AprobarMultiplesCumplidos():void {
-    this.popUp.confirm("Aprobar Cumplidos", "¿Está seguro que desea dar el visto bueno a las solicitudes de cumplidos seleccionadas?", "send").then(result => {
-      if(result.isConfirmed){
-        this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/aprobar_documentos`, this.CumplidosSelected).subscribe({
-          next: (response: Respuesta) => {
-            if(response.Success){
-              this.popUp.close();
-              this.popUp.success("Los cumplidos seleccionados han sido aprobados.").then(() => {
-                this.ngOnInit();
-              });
+    if(this.CumplidosSelected[0] == null){
+      this.popUp.warning("Por favor seleccione un cumplido para aprobar.")
+    }else{
+      this.popUp.confirm("Aprobar Cumplidos", "¿Está seguro que desea dar el visto bueno a las solicitudes de cumplidos seleccionadas?", "send").then(result => {
+        if (result.isConfirmed) {
+          this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/aprobar_documentos`, this.CumplidosSelected).subscribe({
+            next: (response: Respuesta) => {
+              if (response.Success) {
+                this.popUp.close();
+                this.popUp.success("Los cumplidos seleccionados han sido aprobados.").then(() => {
+                  this.ngOnInit();
+                });
+              }
+            }, error: () => {
+              this.popUp.error("No se ha podido aprobar los cumplidos seleccionados.");
             }
-          }, error: () => {
-            this.popUp.error("No se ha podido aprobar los cumplidos seleccionados.");
-          }
-        });
-      }
-    });
+          });
+        }
+      });
+    }
   }
 }
