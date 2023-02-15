@@ -36,6 +36,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { CreacionCumplidosDocenteComponent } from './creacion-cumplidos-docente/creacion-cumplidos-docente.component';
 import { VerSoportesComponent } from './ver-soportes/ver-soportes.component';
 import { AprobacionCoordinadorComponent } from './aprobacion-coordinador/aprobacion-coordinador.component';
+import { AprobacionSupervisorComponent } from './aprobacion-supervisor/aprobacion-supervisor.component';
 
 
 const pagesComponents = [
@@ -69,6 +70,7 @@ const materialModules = [
     CreacionCumplidosDocenteComponent,
     VerSoportesComponent,
     AprobacionCoordinadorComponent,
+    AprobacionSupervisorComponent,
   ],
   imports: [
     HttpClientModule,

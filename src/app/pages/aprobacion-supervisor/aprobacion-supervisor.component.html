@@ -1,0 +1,22 @@
+<mat-card class="card-oas">
+    <mat-card-title class="cumplidos-dve-title">
+        <h2>Aprobación Supervisor</h2>
+    </mat-card-title>
+    <mat-card-content>
+        <div class="container-name">
+            <mat-form-field>
+                <input matInput placeholder="Nombre del Supervisor" disabled="true" [value]="NombreSupervisor">
+            </mat-form-field>
+        </div>
+        <div class="table">
+            <mat-card class="card-oas">
+                <mat-card-title class="cumplidos-dve-title">
+                    <h3>Peticiones</h3>
+                </mat-card-title>
+                <mat-card-content>
+                    <ng2-smart-table [settings]="PeticionesSupervisorSettings" [source]="PeticionesSupervisorData"></ng2-smart-table>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </mat-card-content>
+</mat-card>
