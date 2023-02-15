@@ -209,7 +209,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
         next: (response: Respuesta) => {
           if(response.Success){
             if(response.Data[0].hasOwnProperty('NumeroContrato')){
-              this.popUp.error("Existe el cumplido seleccionado.")
+              this.popUp.warning("Ya existe el cumplido seleccionado.")
             }else{
               //CONSULTAR PARAMETRO
               this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:CD_DVE,Nombre:CARGANDO DOCUMENTOS`).subscribe({
@@ -241,7 +241,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
                       if(response.Success){
                         this.popUp.close();
                         this.popUp.success("Su solicitud de cumplido ha sido creada.").then(() => {
-                          this.ngOnInit()
+                          this.ngOnInit();
                         });
                       }
                     }, error: () => {

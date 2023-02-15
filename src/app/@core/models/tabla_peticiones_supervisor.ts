@@ -1,13 +1,13 @@
 //VARIABLES
- let Numero_Contrato ='';
- let Mes = '';
- let Ano = '';
-export const TablaPeticiones: any = {
+let Numero_Contrato ='';
+let Mes = '';
+let Ano = '';
+export const TablaPeticionesSupervisor: any = {
     Id: {
         hide: true
     },
     Dependencia: {
-        title: 'Proyecto Curricular',
+        title: 'Dependencia',
         width: '15%',
         editable: false,
         filter: false,
@@ -28,7 +28,7 @@ export const TablaPeticiones: any = {
         }
     },
     NombrePersona: {
-        title: 'Nombre Docente',
+        title: 'Nombre Contratista',
         width: '20%',
         editable: false,
         filter: false
@@ -39,7 +39,7 @@ export const TablaPeticiones: any = {
         editable: false,
         filter: false,
         valuePrepareFunction: () => {
-           return Numero_Contrato;
+            return Numero_Contrato;
         }
     },
     Mes: {
