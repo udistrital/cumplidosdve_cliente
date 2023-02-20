@@ -21,6 +21,7 @@ export class AprobacionSupervisorComponent implements OnInit {
   PeticionesSupervisorData: LocalDataSource;
   NombreSupervisor = '';
   DocumentoSupervisor = '';
+  CumplidosSelected : any = [];
 
   constructor(
     private request: RequestManager,
@@ -103,4 +104,214 @@ export class AprobacionSupervisorComponent implements OnInit {
     });
   }
 
+  Acciones(event): void {
+    switch(event.action){
+      case "Aprobar":{
+        this.Aprobar(event);
+        break;
+      }
+      case "Rechazar":{
+        this.Rechazar(event);
+        break;
+      }
+    }
+  }
+
+  Aprobar(event):void {
+    this.popUp.confirm("Aprobar", "¿Está seguro que desea dar el visto bueno a la solicitud de cumplido?", "aprobar").then(result => {
+      if (result.isConfirmed){
+        //VARIABLES
+        var cumplido: any;
+        var parametro: any;
+        var ordenador: string;
+
+        //CONSULTAR PAGO MENSUAL
+        this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=Id:${event.data.PagoMensual.Id}`).subscribe({
+          next: (response: Respuesta) => {
+            if(response.Success){
+              cumplido = response.Data[0];
+
+              //CONSULTAR EL PARAMETRO
+              this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PAD_DVE,Nombre:POR APROBAR DECANO(A)`).subscribe({
+                next: (response: Respuesta) => {
+                  if(response.Success){
+                    parametro = response.Data;
+                    if ((response.Data as any[]).length === 0) {
+                      console.log("No se ha encontrado el parametro.")
+                    }
+
+                    //CONSULTA AL ORDENADOR DEL GASTO
+                    this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
+                      next: (response: Respuesta) => {
+                        if(response.Success){
+                          ordenador = String(response.Data.NumeroDocumento);
+
+                          //CAMBIA EL ESTADO Y AJUSTA VALORES
+                          cumplido.Responsable = ordenador;
+                          cumplido.CargoResponsable = "ORDENADOR DEL GASTO";
+                          cumplido.EstadoPagoMensualId = parametro[0].Id;
+                          cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
+                          cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
+
+                          //APRUEBA LA SOLICITUD
+                          this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
+                            next: (response: Respuesta) => {
+                              if (response.Success) {
+                                this.popUp.close();
+                                this.popUp.success("El cumplido ha sido aprobado.").then(() => {
+                                  this.ngOnInit();
+                                });
+                              }
+                            }, error: () => {
+                              this.popUp.error("No se ha podido aprobar el cumplido.");
+                            }
+                          });
+                        }
+                      }
+                    });
+                  }
+                }, error: () => {
+                  console.log("No se ha podido consultar el parametro.")
+                }
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+
+  Rechazar(event): void {
+    this.popUp.confirm("Rechazar", "¿Está seguro que desea rechazar la solicitud de cumplido?", "rechazar").then(result => {
+      if(result.isConfirmed){
+        //VARIABLES
+        var cumplido :any;
+        var parametro : any;
+
+        //CONSULTAR PAGO MENSUAL
+        this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=Id:${event.data.PagoMensual.Id}`).subscribe({
+          next:(response: Respuesta) => {
+            if(response.Success){
+              cumplido = response.Data[0];
+
+              //CONSULTAR EL PARAMETRO
+              this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:RS_DVE,Nombre:RECHAZO SUPERVISOR`).subscribe({
+                next:(response: Respuesta) => {
+                  if(response.Success){
+                    parametro = response.Data;
+                    if ((response.Data as any[]).length === 0) {
+                      console.log("No se ha encontrado el parametro.")
+                    }
+
+                    //CAMBIA EL ESTADO Y AJUSTA VALORES
+                    cumplido.Responsable = cumplido.Persona;
+                    cumplido.CargoResponsable = "DOCENTE";
+                    cumplido.EstadoPagoMensualId = parametro[0].Id;
+                    cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
+                    cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
+                    console.log(cumplido);
+                    
+                    //RECHAZA LA SOLICITUD
+                    this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
+                      next: (response: Respuesta) => {
+                        if(response.Success){
+                          this.popUp.close();
+                          this.popUp.success("El cumplido ha sido rechazado.").then(() => {
+                            this.ngOnInit();
+                          });
+                        }
+                      }, error: () => {
+                        this.popUp.error("No se ha podido rechazar el cumplido.");
+                      }
+                    });
+                  }
+                }, error: () => {
+                  console.log("No se ha podido consultar el parametro.")
+                }
+              });
+            }
+          }
+        });
+      }
+    })
+  }
+  CumplidosSeleccionados(event): void {
+    //VARIABLES
+    var parametro: any;
+    var cumplido: any;
+    var ordenador: any;
+
+    if(event.isSelected){
+      //GUARDA EL CUMPLIDO
+      cumplido = event.data.PagoMensual;
+
+      //CONSULTA EL PARAMETRO
+      this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PAD_DVE,Nombre:POR APROBAR DECANO(A)`).subscribe({
+        next: (response: Respuesta) => {
+          if(response.Success){
+            parametro = response.Data;
+            if ((response.Data as any[]).length === 0) {
+              console.log("No se ha encontrado el parametro.");
+            }
+            
+            //CONSULTA AL ORDENADOR DEL GASTO
+            this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
+              next: (response: Respuesta) => {
+                if(response.Success){
+                  ordenador = String(response.Data.NumeroDocumento)
+
+                  //CAMBIA EL ESTADO Y AJUSTA VALORES
+                  cumplido.Responsable = ordenador;
+                  cumplido.CargoResponsable = "ORDENADOR DEL GASTO";
+                  cumplido.EstadoPagoMensualId = parametro[0].Id;
+                  cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
+                  cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
+                  this.CumplidosSelected.push(cumplido);
+                }
+              }
+            });
+          }
+        }
+      });
+    }else{
+      //ELIMINA EL CUMPLIDO
+      for(var i = 0; i < this.CumplidosSelected.length; i++){
+        if(this.CumplidosSelected[i] != null && this.CumplidosSelected[i].Id == event.data.PagoMensual.Id){
+          delete this.CumplidosSelected[i];
+        }
+      }
+      //VUELVE A ARMAR EL ARRAY SIN ESPACIOS EN BLANCO
+      var cont = 0;
+      var cumplidos_nuevo = [];
+      for(var i = 0; i < this.CumplidosSelected.length; i++){
+        if(this.CumplidosSelected[i] != null){
+          cumplidos_nuevo[cont] = this.CumplidosSelected[i];
+          cont++;
+        }
+      }
+      this.CumplidosSelected = cumplidos_nuevo;
+    }
+  }
+  AprobarMultiplesCumplidos(): void {
+    if(this.CumplidosSelected[0] == null){
+      this.popUp.warning("Por favor seleccione un cumplido para aprobar.")
+    }else{
+      this.popUp.confirm("Aprobar Cumplidos", "¿Está seguro que desea dar el visto bueno a las solicitudes de cumplidos seleccionadas?", "send").then(result => {
+        if (result.isConfirmed) {
+          this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/aprobar_documentos`, this.CumplidosSelected).subscribe({
+            next: (response: Respuesta) => {
+              if (response.Success) {
+                this.popUp.close();
+                this.popUp.success("Los cumplidos seleccionados han sido aprobados.").then(() => {
+                  this.ngOnInit();
+                });
+              }
+            }, error: () => {
+              this.popUp.error("No se ha podido aprobar los cumplidos seleccionados.");
+            }
+          });
+        }
+      });
+    }
+  }
 }
