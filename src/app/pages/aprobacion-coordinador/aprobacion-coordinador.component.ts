@@ -203,13 +203,13 @@ export class AprobacionCoordinadorComponent implements OnInit {
                     }
 
                     //CAMBIA EL ESTADO Y AJUSTA VALORES
-                    cumplido.Responsable = cumplido.persona;
+                    cumplido.Responsable = cumplido.Persona;
                     cumplido.CargoResponsable = "DOCENTE";
                     cumplido.EstadoPagoMensualId = parametro[0].Id;
                     cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
                     cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
 
-                    //APRUEBA LA SOLICITUD
+                    //RECHAZA LA SOLICITUD
                     this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
                       next: (response: Respuesta) => {
                         if(response.Success){
