@@ -1,0 +1,44 @@
+<mat-card class="card-oas">
+    <mat-card-title class="cumplidos-dve-title">
+        <h2>Aprobación Pago</h2>
+    </mat-card-title>
+    <mat-card-content>
+        <div class="container-name">
+            <mat-form-field>
+                <input matInput placeholder="Nombre del Ordenador del Gasto" disabled="true">
+            </mat-form-field>
+        </div>
+        <div class="form-time">
+            <mat-form-field appearance="outline">
+                <mat-label>MES</mat-label>
+                <mat-select disabled="true">
+                    <mat-option></mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>AÑO</mat-label>
+                <mat-select disabled="true">
+                    <mat-option></mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>PERIODO</mat-label>
+                <mat-select disabled="true">
+                    <mat-option></mat-option>
+                </mat-select>
+            </mat-form-field>
+            <button mat-raised-button class="send">Generar Certificado</button>
+        </div>
+        <div class="table">
+            <mat-card class="card-oas">
+                <mat-card-title class="cumplidos-dve-title">
+                    <h3>Peticiones</h3>
+                </mat-card-title>
+                <mat-card-content>
+                    <ng2-smart-table [settings]="PeticionesOrdenadorSettings"></ng2-smart-table>
+                    <button mat-raised-button class="send">Aprobar Cumplidos</button>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </mat-card-content>
+</mat-card>
