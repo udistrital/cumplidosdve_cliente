@@ -1,0 +1,31 @@
+.cumplidos-dve-title{
+    text-align: center;
+}
+
+.container-name{
+    display: flex;
+    flex-direction: column;
+    width: 25%;
+}
+
+.table .card-oas{
+    width: 98%;
+}
+
+.form-time mat-form-field{
+    margin-left: 32px;
+    width: 30%;
+}
+
+.table ng2-smart-table{
+    text-align: center;
+}
+
+.send{
+    margin-top: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    left: 47%;
+    color: white;
+    background-color: forestgreen;
+}

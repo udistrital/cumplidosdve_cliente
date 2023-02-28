@@ -37,6 +37,7 @@ import { CreacionCumplidosDocenteComponent } from './creacion-cumplidos-docente/
 import { VerSoportesComponent } from './ver-soportes/ver-soportes.component';
 import { AprobacionCoordinadorComponent } from './aprobacion-coordinador/aprobacion-coordinador.component';
 import { AprobacionSupervisorComponent } from './aprobacion-supervisor/aprobacion-supervisor.component';
+import { AprobacionPagoComponent } from './aprobacion-pago/aprobacion-pago.component';
 
 
 const pagesComponents = [
@@ -71,6 +72,7 @@ const materialModules = [
     VerSoportesComponent,
     AprobacionCoordinadorComponent,
     AprobacionSupervisorComponent,
+    AprobacionPagoComponent,
   ],
   imports: [
     HttpClientModule,
