@@ -133,13 +133,16 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
     this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=numero_contrato:${this.information.NumeroVinculacion},vigencia_contrato:${this.information.Vigencia}`).subscribe({
       next: (response: Respuesta) => {
         if (response.Success){
-          if (response.Data[0].hasOwnProperty('NumeroContrato')){
+          if (response.Data.length != 0){
             this.CumplidosData = new LocalDataSource(response.Data);
             this.CambioEstado(this.CumplidosData);
             setTimeout(() => {
               this.CumplidosData.setSort([{field: 'Mes', direction: 'desc'}],true);
               this.popUp.close();
             }, 3000);
+          }else{
+            this.popUp.close();
+            this.popUp.warning("No existen cumplidos asociados al numero de contrato.");
           }
         }
       }, error: () => {
@@ -208,7 +211,8 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
       this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=numero_contrato:${this.information.NumeroVinculacion},vigencia_contrato:${this.information.Vigencia},Mes:${this.MesSeleccionado},Ano:${this.AnoSeleccionado}`).subscribe({
         next: (response: Respuesta) => {
           if(response.Success){
-            if(response.Data[0].hasOwnProperty('NumeroContrato')){
+            
+            if(response.Data.length != 0){
               this.popUp.warning("Ya existe el cumplido seleccionado.")
             }else{
               //CONSULTAR PARAMETRO
@@ -229,8 +233,8 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
                     Persona: this.documentoDocente,
                     EstadoPagoMensualId: this.Parametro[0].Id,
                     Responsable: this.documentoDocente,
-                    FechaCreacion: new Date().toLocaleString("sv-SE"),
-                    FechaModificacion: new Date().toLocaleString("sv-SE"),
+                    FechaCreacion: new Date(),
+                    FechaModificacion: new Date(),
                     CargoResponsable: "DOCENTE",
                     Ano: this.AnoSeleccionado
                   }
@@ -303,11 +307,11 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
                     }
 
                     //CAMBIA EL ESTADO Y AJUSTA VALORES
-                    cumplido.Responsable = this.coordinador.carreraSniesCollection.carreraSnies[0].numero_documento_coordinador
+                    cumplido.Responsable = this.coordinador.carreraSniesCollection.carreraSnies[0].numero_documento_coordinador;
                     cumplido.CargoResponsable = "COORDINADOR";
                     cumplido.EstadoPagoMensualId = parametro[0].Id;
-                    cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
-                    cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
+                    cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
+                    cumplido.FechaModificacion = new Date();
 
                     //ENVIA LA SOLICITUD
                     this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.Id).subscribe({
