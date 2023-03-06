@@ -1,4 +1,3 @@
-import { analyzeAndValidateNgModules } from '@angular/compiler';
 import { Component, OnInit } from '@angular/core';
 import { LocalDataSource } from 'ng2-smart-table';
 import { Respuesta } from 'src/app/@core/models/respuesta';
@@ -150,8 +149,8 @@ export class AprobacionCoordinadorComponent implements OnInit {
                         cumplido.Responsable = Supervisor;
                         cumplido.CargoResponsable = "SUPERVISOR";
                         cumplido.EstadoPagoMensualId = parametro[0].Id;
-                        cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
-                        cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
+                        cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
+                        cumplido.FechaModificacion = new Date();
 
                         //APRUEBA LA SOLICITUD
                         this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
@@ -206,8 +205,8 @@ export class AprobacionCoordinadorComponent implements OnInit {
                     cumplido.Responsable = cumplido.Persona;
                     cumplido.CargoResponsable = "DOCENTE";
                     cumplido.EstadoPagoMensualId = parametro[0].Id;
-                    cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
-                    cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
+                    cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
+                    cumplido.FechaModificacion = new Date();
 
                     //RECHAZA LA SOLICITUD
                     this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
@@ -254,8 +253,8 @@ export class AprobacionCoordinadorComponent implements OnInit {
                 cumplido.Responsable = response.contrato.supervisor.documento_identificacion;
                 cumplido.CargoResponsable = "SUPERVISOR";
                 cumplido.EstadoPagoMensualId = parametro[0].Id;
-                cumplido.FechaCreacion = new Date(cumplido.FechaCreacion).toLocaleString("sv-SE");
-                cumplido.FechaModificacion = new Date().toLocaleString("sv-SE");
+                cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
+                cumplido.FechaModificacion = new Date();
                 this.CumplidosSelected.push(cumplido);
               }
             });
