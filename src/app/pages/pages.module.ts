@@ -28,6 +28,7 @@ import { FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { OasGridColsDirective } from './directives/oas-grid-cols.directive';
 
 import { Ng2SmartTableModule } from 'ng2-smart-table';
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { UtilService } from './services/utilService';
 import { UserService } from './services/userService';
 import { InterceptorService } from '../loader/interceptor.service';
@@ -38,6 +39,7 @@ import { VerSoportesComponent } from './ver-soportes/ver-soportes.component';
 import { AprobacionCoordinadorComponent } from './aprobacion-coordinador/aprobacion-coordinador.component';
 import { AprobacionSupervisorComponent } from './aprobacion-supervisor/aprobacion-supervisor.component';
 import { AprobacionPagoComponent } from './aprobacion-pago/aprobacion-pago.component';
+import { ModalDocumentViewerComponent } from './modal-document-viewer/modal-document-viewer.component';
 
 
 const pagesComponents = [
@@ -73,6 +75,7 @@ const materialModules = [
     AprobacionCoordinadorComponent,
     AprobacionSupervisorComponent,
     AprobacionPagoComponent,
+    ModalDocumentViewerComponent,
   ],
   imports: [
     HttpClientModule,
@@ -81,6 +84,7 @@ const materialModules = [
     ReactiveFormsModule,
     PagesRoutingModule,
     Ng2SmartTableModule,
+    NgxExtendedPdfViewerModule,
     MatDialogModule,
     ...materialModules,
   ],

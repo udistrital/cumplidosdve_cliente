@@ -35,8 +35,8 @@
                     <h3>Peticiones</h3>
                 </mat-card-title>
                 <mat-card-content>
-                    <ng2-smart-table [settings]="PeticionesOrdenadorSettings" [source]="PeticionesOrdenadorData" (custom)="Acciones($event)"></ng2-smart-table>
-                    <button mat-raised-button class="send">Aprobar Cumplidos</button>
+                    <ng2-smart-table [settings]="PeticionesOrdenadorSettings" [source]="PeticionesOrdenadorData" (custom)="Acciones($event)" (userRowSelect)="CumplidosSeleccionados($event)"></ng2-smart-table>
+                    <button mat-raised-button class="send" (click)="AprobarMultiplesPagos()">Aprobar Cumplidos</button>
                 </mat-card-content>
             </mat-card>
         </div>

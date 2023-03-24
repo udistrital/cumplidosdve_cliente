@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { LocalDataSource } from 'ng2-smart-table';
 import { Respuesta } from 'src/app/@core/models/respuesta';
 import { TablaPeticiones } from 'src/app/@core/models/tabla_peticiones';
 import { environment } from 'src/environments/environment';
+import { ModalDocumentViewerComponent } from '../modal-document-viewer/modal-document-viewer.component';
 import { RequestManager } from '../services/requestManager';
 import { UserService } from '../services/userService';
 import { UtilService } from '../services/utilService';
@@ -16,6 +18,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
 
   //SETTINGS
   PeticionesSettings: any;
+  dialogConfig: MatDialogConfig;
 
   //DATA
   PeticionesData: LocalDataSource;
@@ -23,19 +26,33 @@ export class AprobacionCoordinadorComponent implements OnInit {
   documentoCoordinador = '';
   documentoSupervisor: any;
   CumplidosSelected : any = [];
+  Proyectos_Curriculares = [];
+  Meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+  MesSeleccionado: any = null;
+  Anos = [(new Date().getFullYear()), (new Date().getFullYear()) + 1];
+  AnoSeleccionado: any = null;
+  Periodos = [];
+  PeriodoSeleccionado: any = null;
+  ProyectoCurricularSeleccionado: any = null;
 
   constructor(
     private request: RequestManager,
+    private dialog: MatDialog,
     private popUp: UtilService,
     private userService: UserService,
   ) {
     this.initTable();
+    this.GenerarPeriodos();
   }
 
   ngOnInit(): void {
     this.consultarNumeroDocumento();
     this.consultarCoordinador();
     this.consultarPeticiones();
+    this.dialogConfig = new MatDialogConfig();
+    this.dialogConfig.width = '1200px';
+    this.dialogConfig.height = '800px';
+    this.dialogConfig.data = {};
   }
 
   initTable(): void {
@@ -65,6 +82,13 @@ export class AprobacionCoordinadorComponent implements OnInit {
     };
   }
 
+  GenerarPeriodos(): void {
+    var AnoActual = new Date().getFullYear();
+    var AnoProximo = new Date().getFullYear() + 1;
+    this.Periodos[AnoActual] = [ AnoActual + "-3", AnoActual + "-1"]
+    this.Periodos[AnoProximo] = [ AnoProximo + "-3", AnoProximo + "-1"]
+  }
+
   consultarNumeroDocumento(): void {
     this.popUp.loading();
     this.userService.user$.subscribe((data: any) => {
@@ -81,6 +105,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
         next: (response: any) => {
               this.popUp.close();
               this.NombreCoordinador = response.coordinadorCollection.coordinador[0].nombre_coordinador;
+              this.Proyectos_Curriculares = response.coordinadorCollection.coordinador;
         }, error: () => {
           this.popUp.close();
           this.popUp.error('No se ha podido consultar al coordinador.');
@@ -103,6 +128,46 @@ export class AprobacionCoordinadorComponent implements OnInit {
           this.popUp.error("No existen peticiones asociadas al coordinador.");
         }
       });
+  }
+
+  GenerarCertificado(): void {
+    if(this.ProyectoCurricularSeleccionado == null || this.MesSeleccionado == null || this.AnoSeleccionado == null || this.PeriodoSeleccionado == null){
+      this.popUp.warning("Se deben de seleccionar todos los campos para generar el certificado.")
+    }else{
+      //VARIABLES
+      var Oikos = null;
+      var ProyectoCurricular = null;
+      var Facultad = null
+
+      this.popUp.loading();
+
+      this.request.get(environment.DEPENDENCIAS_SERVICE, `proyecto_curricular_snies/${this.ProyectoCurricularSeleccionado}`).subscribe({
+        next:(response:any) => {
+          Oikos = response.homologacion.id_oikos;
+          ProyectoCurricular = response.homologacion.proyecto_snies;
+          this.request.get(environment.OIKOS_SERVICE, `dependencia_padre/?query=Hija:${Oikos}`).subscribe({
+            next:(response:any) =>{
+              Facultad = response[0].Padre.Nombre;
+              this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/generar_certificado/${this.NombreCoordinador}/${ProyectoCurricular}/${Oikos}/${Facultad}/${this.MesSeleccionado}/${this.AnoSeleccionado}/${this.PeriodoSeleccionado}`).subscribe({
+                next:(response:Respuesta) => {
+                  if(response.Success){
+                    this.popUp.close();
+                    this.dialogConfig.data = response.Data as string;
+                    this.dialog.open(ModalDocumentViewerComponent, this.dialogConfig);
+                  }
+                }, error: () => {
+                  this.popUp.error("No se ha podido generar el PDF.")
+                }
+              });
+            }, error: () => {
+              this.popUp.error("No se ha podido generar el PDF.")
+            }
+          });
+        }, error: () => {
+          this.popUp.error("No se ha podido generar el PDF.")
+        }
+      });
+    }
   }
 
   Acciones(event): void {
@@ -292,6 +357,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
               if (response.Success) {
                 this.popUp.close();
                 this.popUp.success("Los cumplidos seleccionados han sido aprobados.").then(() => {
+                  this.CumplidosSelected = [];
                   this.ngOnInit();
                 });
               }
