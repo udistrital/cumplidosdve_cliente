@@ -21,6 +21,7 @@ export class AprobacionPagoComponent implements OnInit {
   PeticionesOrdenadorData: LocalDataSource;
   NombreSupervisor = '';
   DocumentoOrdenador = '';
+  CumplidosSelected: any = [];
 
   constructor(
     private request: RequestManager,
@@ -222,6 +223,73 @@ export class AprobacionPagoComponent implements OnInit {
         });
       }
     });
+  }
+
+  CumplidosSeleccionados(event): void {
+    //VARIABLES
+    var parametro: any;
+    var cumplido: any;
+
+    if(event.isSelected){
+      //CONSULTA EL PARAMETRO
+      this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:AP_DVE,Nombre:APROBACIÓN PAGO`).subscribe({
+        next:(response: Respuesta) => {
+          if(response.Success){
+            parametro = response.Data;
+            if ((response.Data as any[]).length === 0) {
+              console.log("No se ha encontrado el parametro.");
+            }
+            //SE CREA EL CUMPLIDO Y SE CAMBIAN VALORES
+            cumplido = event.data.PagoMensual;
+            cumplido.EstadoPagoMensualId = parametro[0].Id;
+            cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
+            cumplido.FechaModificacion = new Date();
+            this.CumplidosSelected.push(cumplido);
+          }
+        }
+      });
+    }else{
+      //ELIMINA EL CUMPLIDO
+      for(var i = 0; i < this.CumplidosSelected.length; i++){
+        if(this.CumplidosSelected[i] != null && this.CumplidosSelected[i].Id == event.data.PagoMensual.Id){
+          delete this.CumplidosSelected[i];
+        }
+      }
+      //VUELVE A ARMAR EL ARRAY SIN ESPACIOS EN BLANCO
+      var cont = 0;
+      var cumplidos_nuevo = [];
+      for(var i = 0; i < this.CumplidosSelected.length; i++){
+        if(this.CumplidosSelected[i] != null){
+          cumplidos_nuevo[cont] = this.CumplidosSelected[i];
+          cont++;
+        }
+      }
+      this.CumplidosSelected = cumplidos_nuevo;
+    }
+  }
+
+  AprobarMultiplesPagos(): void {
+    if(this.CumplidosSelected[0] == null){
+      this.popUp.warning("Por favor seleccione un cumplido para aprobar el pago.")
+    }else{
+      this.popUp.confirm("Aprobar Pagos", "¿Está seguro que desea aprobar el pago para las solicitudes de cumplidos seleccionadas?", "send").then(result => {
+        if(result.isConfirmed){
+          this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/aprobar_pagos`, this.CumplidosSelected).subscribe({
+            next:(response:Respuesta) => {
+              if(response.Success){
+                this.popUp.close();
+                this.popUp.success("Los cumplidos seleccionados han sido aprobados para el pago").then(() => {
+                  this.CumplidosSelected = [];
+                  this.ngOnInit();
+                });
+              }
+            }, error: () => {
+              this.popUp.error("No se ha podido aprobar los pagos de los cumplidos seleccionados.")
+            }
+          });
+        }
+      });
+    }
   }
 
 }

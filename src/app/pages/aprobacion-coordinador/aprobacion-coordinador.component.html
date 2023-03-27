@@ -11,31 +11,31 @@
         <form>
             <mat-form-field class="form-proyecto-curricular" appearance="outline">
                 <mat-label>PROYECTO CURRICULAR</mat-label>
-                <mat-select disabled="true">
-                    <mat-option></mat-option>
+                <mat-select [(value)]="ProyectoCurricularSeleccionado">
+                    <mat-option [value]="proyecto_curricular.codigo_snies" *ngFor="let proyecto_curricular of Proyectos_Curriculares">{{proyecto_curricular.nombre_proyecto_condor}}</mat-option>
                 </mat-select>
             </mat-form-field>
             <div class="form-time">
                 <mat-form-field appearance="outline">
                     <mat-label>MES</mat-label>
-                    <mat-select disabled="true">
-                        <mat-option></mat-option>
+                    <mat-select [(value)]="MesSeleccionado">
+                        <mat-option [value]="mes" *ngFor="let mes of Meses">{{mes}}</mat-option>
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                     <mat-label>AÑO</mat-label>
-                    <mat-select disabled="true">
-                        <mat-option></mat-option>
+                    <mat-select [(value)]="AnoSeleccionado">
+                        <mat-option [value]="ano" *ngFor="let ano of Anos">{{ano}}</mat-option>
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                     <mat-label>PERIODO</mat-label>
-                    <mat-select disabled="true">
-                        <mat-option></mat-option>
+                    <mat-select [(value)]="PeriodoSeleccionado">
+                        <mat-option [value]="periodo" *ngFor="let periodo of Periodos[AnoSeleccionado]">{{periodo}}</mat-option>
                     </mat-select>
                 </mat-form-field>
             </div>
-            <button mat-raised-button class="send">Generar Certificado</button>
+            <button mat-raised-button class="send" (click)="GenerarCertificado()">Generar Certificado</button>
         </form>
         <div class="table">
             <mat-card class="card-oas">
