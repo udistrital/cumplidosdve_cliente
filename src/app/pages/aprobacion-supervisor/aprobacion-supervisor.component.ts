@@ -302,6 +302,7 @@ export class AprobacionSupervisorComponent implements OnInit {
               if (response.Success) {
                 this.popUp.close();
                 this.popUp.success("Los cumplidos seleccionados han sido aprobados.").then(() => {
+                  this.CumplidosSelected = [];
                   this.ngOnInit();
                 });
               }
