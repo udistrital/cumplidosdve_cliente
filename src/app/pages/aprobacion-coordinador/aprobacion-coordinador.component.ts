@@ -79,6 +79,10 @@ export class AprobacionCoordinadorComponent implements OnInit {
       },
       selectedRowIndex: -1,
       noDataMessage: 'No hay peticiones a revisar',
+      pager: {
+        display: true,
+        perPage: 10,
+      }
     };
   }
 
@@ -119,12 +123,15 @@ export class AprobacionCoordinadorComponent implements OnInit {
       environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/solicitudes_coordinador/${this.documentoCoordinador}`).subscribe({
         next: (response: Respuesta) => {
           if(response.Success){
-            this.PeticionesData = new LocalDataSource(response.Data);
-            if((response.Data as any).length === 0){
-              console.log("No se han encontrado peticiones.");
+            this.popUp.close();
+            if(response.Data == null || (response.Data as any).length === 0){
+              this.popUp.warning("No se encontraron peticiones para el coordinador.");
+            }else{
+              this.PeticionesData = new LocalDataSource(response.Data);
             }
           }
         }, error: () => {
+          this.popUp.close();
           this.popUp.error("No existen peticiones asociadas al coordinador.");
         }
       });
