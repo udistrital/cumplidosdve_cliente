@@ -22,6 +22,12 @@ export class AprobacionPagoComponent implements OnInit {
   NombreSupervisor = '';
   DocumentoOrdenador = '';
   CumplidosSelected: any = [];
+  Meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+  MesSeleccionado: any = null;
+  Anos = [(new Date().getFullYear()), (new Date().getFullYear()) + 1];
+  AnoSeleccionado: any = null;
+  Periodos = [];
+  PeriodoSeleccionado: any = null;
 
   constructor(
     private request: RequestManager,
@@ -29,6 +35,7 @@ export class AprobacionPagoComponent implements OnInit {
     private userService: UserService,
   ) {
     this.initTable();
+    this.GenerarPeriodos();
   }
 
   ngOnInit(): void {
@@ -61,7 +68,18 @@ export class AprobacionPagoComponent implements OnInit {
       },
       selectedRowIndex: -1,
       noDataMessage: 'No hay peticiones a revisar',
+      pager: {
+        display: true,
+        perPage: 10,
+      }
     };
+  }
+
+  GenerarPeriodos(): void {
+    var AnoActual = new Date().getFullYear();
+    var AnoProximo = new Date().getFullYear() + 1;
+    this.Periodos[AnoActual] = [ AnoActual + "-3", AnoActual + "-1"]
+    this.Periodos[AnoProximo] = [ AnoProximo + "-3", AnoProximo + "-1"]
   }
 
   consultarNumeroDocumento(): void {
@@ -92,9 +110,11 @@ export class AprobacionPagoComponent implements OnInit {
       next: (response: Respuesta) => {
         if(response.Success){
           this.popUp.close();
-          this.PeticionesOrdenadorData = new LocalDataSource(response.Data);
-          if((response.Data as any).length === 0){
-            console.log("No se han encontrado peticiones.");
+          if(response.Data == null || (response.Data as any).length === 0){
+            this.popUp.warning("No se encontraron peticiones para el Ordenador del Gasto.");
+          }else{
+            this.popUp.close();
+            this.PeticionesOrdenadorData = new LocalDataSource(response.Data);
           }
         }
       }, error: () => {
@@ -102,6 +122,14 @@ export class AprobacionPagoComponent implements OnInit {
         this.popUp.error("No existen peticiones asociadas al Ordenador.");
       }
     });
+  }
+
+  GenerarCertificado(): void {
+    if(this.MesSeleccionado == null || this.AnoSeleccionado == null || this.PeriodoSeleccionado == null){
+      this.popUp.warning("Se deben de seleccionar todos los campos para generar el certificado.")
+    }else{
+      
+    }
   }
 
   Acciones(event): void {

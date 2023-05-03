@@ -29,6 +29,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
   //DATA
   CumplidosData: LocalDataSource;
   Data_Anos = [];
+  
   Data_Meses = [];
   Data_Anos_Meses = [];
   Data_Mes_Enviado: any = 0;
@@ -36,7 +37,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
 
   //VARIABLES
   information: any;
-  contrato: any={};
+  contrato:any = [];
   Ano_Inicial: any;
   Ano_Final: any;
   Mes_Inicial: any;
@@ -110,6 +111,10 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
       },
       selectedRowIndex: -1,
       noDataMessage: 'No hay cumplidos asociados al docente',
+      pager: {
+        display: true,
+        perPage: 10,
+      }
     }
   }
 
@@ -133,16 +138,16 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
     this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=numero_contrato:${this.information.NumeroVinculacion},vigencia_contrato:${this.information.Vigencia}`).subscribe({
       next: (response: Respuesta) => {
         if (response.Success){
-          if (response.Data.length != 0){
+          if (response.Data == null || (response.Data as any[]).length === 0){
+            this.popUp.close();
+            this.popUp.warning("No existen cumplidos asociados al numero de contrato.");
+          }else{
             this.CumplidosData = new LocalDataSource(response.Data);
             this.CambioEstado(this.CumplidosData);
             setTimeout(() => {
               this.CumplidosData.setSort([{field: 'Mes', direction: 'desc'}],true);
               this.popUp.close();
             }, 3000);
-          }else{
-            this.popUp.close();
-            this.popUp.warning("No existen cumplidos asociados al numero de contrato.");
           }
         }
       }, error: () => {
@@ -177,9 +182,9 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
   }
 
   CargarMesesYDias(): void {
-    this.Ano_Inicial = new Date(this.contrato[0].FechaInicio).getFullYear();
+    this.Ano_Inicial = (new Date(this.contrato[0].FechaInicio).getFullYear()) + 1;
     this.Ano_Final = new Date(this.contrato[0].FechaFin).getFullYear();
-
+    
     for(var anio = this.Ano_Inicial; anio <= this.Ano_Final; anio++){
       this.Data_Anos.push(anio);
       this.Mes_Final = anio != this.Ano_Final ? 11 : (new Date(this.contrato[0].FechaFin).getUTCMonth() + 1);
@@ -245,6 +250,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
                       if(response.Success){
                         this.popUp.close();
                         this.popUp.success("Su solicitud de cumplido ha sido creada.").then(() => {
+                          this.Data_Anos = [];
                           this.ngOnInit();
                         });
                       }
@@ -319,6 +325,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
                         if (response2.Success) {
                           this.popUp.close();
                           this.popUp.success("El cumplido ha sido enviado.").then(() => {
+                            this.Data_Anos = [];
                             this.ngOnInit();
                           });
                         }

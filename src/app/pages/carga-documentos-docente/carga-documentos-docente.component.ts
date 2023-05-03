@@ -58,6 +58,10 @@ export class CargaDocumentosDocenteComponent implements OnInit {
       },
       selectedRowIndex: -1,
       noDataMessage: 'No hay contratos asociados al docente',
+      pager: {
+        display: true,
+        perPage: 10,
+      }
     };
   }
 
@@ -65,7 +69,7 @@ export class CargaDocumentosDocenteComponent implements OnInit {
     this.popUp.loading();
     this.userService.user$.subscribe((data: any) => {
       if(data ? data.userService ? data.userService.documento ? true : false : false : false){
-        this.documentoDocente = data.userService.documento
+        this.documentoDocente = data.userService.documento;
       }
     })
   }
@@ -78,10 +82,11 @@ export class CargaDocumentosDocenteComponent implements OnInit {
       next: (response: Respuesta) => {
         if (response.Success){
           this.popUp.close();
-          this.CargaDocumentosDocenteData = new LocalDataSource(response.Data);
-          this.NombreDocente = response.Data[0].NombreDocente
-          if ((response.Data as any[]).length === 0 ) {
+          if ( response.Data == null || (response.Data as any[]).length === 0 ) {
             this.popUp.warning('No se encontraron contratos para el docente.');
+          }else{
+            this.CargaDocumentosDocenteData = new LocalDataSource(response.Data);
+            this.NombreDocente = response.Data[0].NombreDocente;
           }
         }
       }, error: () => {
@@ -92,7 +97,7 @@ export class CargaDocumentosDocenteComponent implements OnInit {
   }
 
   CreacionCumplidosDocente(event): void {
-    this.servicioCargaDocumentosDocente.SendData(event.data)
+    this.servicioCargaDocumentosDocente.SendData(event.data);
     this.router.navigate(["../creacion_cumplidos_docente"], {relativeTo: this.route});
   }
 }
