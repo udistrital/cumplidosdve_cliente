@@ -1,0 +1,12 @@
+:host ::ng-deep {
+    .page-item {
+        margin: 3px;
+    }
+
+    .page-link {
+        padding: 8px;
+        padding-left: 14px;
+        padding-right: 14px;
+        border-radius: 4px !important;
+    }
+}

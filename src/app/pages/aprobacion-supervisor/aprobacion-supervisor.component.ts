@@ -61,6 +61,10 @@ export class AprobacionSupervisorComponent implements OnInit {
       },
       selectedRowIndex: -1,
       noDataMessage: 'No hay peticiones a revisar',
+      pager: {
+        display: true,
+        perPage: 10,
+      }
     };
   }
 
@@ -92,9 +96,10 @@ export class AprobacionSupervisorComponent implements OnInit {
       next: (response: Respuesta) => {
         if(response.Success){
           this.popUp.close();
-          this.PeticionesSupervisorData = new LocalDataSource(response.Data)
-          if((response.Data as any).length === 0){
-            console.log("No se han encontrado peticiones.");
+          if(response.Data == null || (response.Data as any).length === 0){
+            this.popUp.warning("No se han encontrado peticiones para el supervisor.");
+          }else{
+            this.PeticionesSupervisorData = new LocalDataSource(response.Data)
           }
         }
       }, error: () => {

@@ -11,23 +11,23 @@
         <div class="form-time">
             <mat-form-field appearance="outline">
                 <mat-label>MES</mat-label>
-                <mat-select disabled="true">
-                    <mat-option></mat-option>
+                <mat-select [(value)]="MesSeleccionado">
+                    <mat-option [value]="mes" *ngFor="let mes of Meses">{{mes}}</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label>AÑO</mat-label>
-                <mat-select disabled="true">
-                    <mat-option></mat-option>
+                <mat-select [(value)]="AnoSeleccionado">
+                    <mat-option [value]="ano" *ngFor="let ano of Anos">{{ano}}</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label>PERIODO</mat-label>
-                <mat-select disabled="true">
-                    <mat-option></mat-option>
+                <mat-select [(value)]="PeriodoSeleccionado">
+                    <mat-option [value]="periodo" *ngFor="let periodo of Periodos[AnoSeleccionado]">{{periodo}}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-raised-button class="send">Generar Certificado</button>
+            <button mat-raised-button class="send" (click)="GenerarCertificado()">Generar Certificado</button>
         </div>
         <div class="table">
             <mat-card class="card-oas">

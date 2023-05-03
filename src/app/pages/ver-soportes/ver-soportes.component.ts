@@ -45,7 +45,7 @@ export class VerSoportesComponent implements OnInit {
     this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `soporte_pago_mensual/?query=pago_mensual_id:${this.information.Id}`).subscribe({
       next: (response: Respuesta) => {
         if(response.Success){
-          if(response.Data[0].hasOwnProperty('Documento')){
+          if(response.Data[0] != undefined && response.Data[0].hasOwnProperty('Documento')){
             this.soporte_pago_mensual = response.Data;
             this.ConsultarDocumento();
           }else{
