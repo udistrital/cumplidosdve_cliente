@@ -144,7 +144,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
       //VARIABLES
       var Oikos = null;
       var ProyectoCurricular = null;
-      var Facultad = null
+      var Facultad = null;
 
       this.popUp.loading();
 
