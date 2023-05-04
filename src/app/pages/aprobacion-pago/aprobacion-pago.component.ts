@@ -19,7 +19,7 @@ export class AprobacionPagoComponent implements OnInit {
 
   //DATA
   PeticionesOrdenadorData: LocalDataSource;
-  NombreSupervisor = '';
+  NombreOrdenador = '';
   DocumentoOrdenador = '';
   CumplidosSelected: any = [];
   Meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
@@ -93,10 +93,10 @@ export class AprobacionPagoComponent implements OnInit {
 
   consultarOrdenador(): void {
     this.popUp.loading();
-    this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `ordenador_gasto?query=Documento:${this.DocumentoOrdenador}&limit=0`).subscribe({
+    this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `ordenadores?query=Documento:${this.DocumentoOrdenador}&limit=0`).subscribe({
       next: (response: any) => {
         this.popUp.close();
-        this.NombreSupervisor = response[0].Nombre;
+        this.NombreOrdenador = response[0].NombreOrdenador;
       }, error: () => {
         this.popUp.close();
         this.popUp.error('No se ha podido consultar el Ordenador del gasto.')
@@ -128,7 +128,18 @@ export class AprobacionPagoComponent implements OnInit {
     if(this.MesSeleccionado == null || this.AnoSeleccionado == null || this.PeriodoSeleccionado == null){
       this.popUp.warning("Se deben de seleccionar todos los campos para generar el certificado.")
     }else{
-      
+      var Dependencia = null;
+
+      this.popUp.loading();
+
+      this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/dependencia_ordenador/${this.DocumentoOrdenador}`).subscribe({
+        next:(response:Respuesta) => {
+          if(response.Success){
+            this.popUp.close();
+            Dependencia = response.Data;
+          }
+        }
+      })
     }
   }
 
@@ -151,7 +162,6 @@ export class AprobacionPagoComponent implements OnInit {
         //VARIABLES
         var cumplido: any;
         var parametro: any;
-        var ordenador: string;
 
         //CONSULTAR PAGO MENSUAL
         this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=Id:${event.data.PagoMensual.Id}`).subscribe({
