@@ -6,6 +6,8 @@ import { environment } from 'src/environments/environment';
 import { RequestManager } from '../services/requestManager';
 import { UserService } from '../services/userService';
 import { UtilService } from '../services/utilService';
+import { ModalDocumentViewerComponent } from '../modal-document-viewer/modal-document-viewer.component';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-aprobacion-pago',
@@ -16,6 +18,7 @@ export class AprobacionPagoComponent implements OnInit {
 
   //SETTINGS
   PeticionesOrdenadorSettings: any;
+  dialogConfig: MatDialogConfig;
 
   //DATA
   PeticionesOrdenadorData: LocalDataSource;
@@ -31,6 +34,7 @@ export class AprobacionPagoComponent implements OnInit {
 
   constructor(
     private request: RequestManager,
+    private dialog: MatDialog,
     private popUp: UtilService,
     private userService: UserService,
   ) {
@@ -42,6 +46,10 @@ export class AprobacionPagoComponent implements OnInit {
     this.consultarNumeroDocumento();
     this.consultarOrdenador();
     this.consultarPeticiones();
+    this.dialogConfig = new MatDialogConfig();
+    this.dialogConfig.width = '1200px';
+    this.dialogConfig.height = '800px';
+    this.dialogConfig.data = {};
   }
 
   initTable(): void {
@@ -128,18 +136,36 @@ export class AprobacionPagoComponent implements OnInit {
     if(this.MesSeleccionado == null || this.AnoSeleccionado == null || this.PeriodoSeleccionado == null){
       this.popUp.warning("Se deben de seleccionar todos los campos para generar el certificado.")
     }else{
-      var Dependencia = null;
-
+      var facultad_homologada = null;
+      var dependencia = null;
+      
       this.popUp.loading();
 
       this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/dependencia_ordenador/${this.DocumentoOrdenador}`).subscribe({
         next:(response:Respuesta) => {
           if(response.Success){
-            this.popUp.close();
-            Dependencia = response.Data;
+            facultad_homologada = response.Data;
+            this.request.get(environment.OIKOS_SERVICE, `dependencia/${facultad_homologada}`).subscribe({
+              next:(response:any) => {
+                dependencia = response.Nombre;
+                this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/generar_certificado/${this.NombreOrdenador}/${facultad_homologada}/${dependencia}/${this.MesSeleccionado}/${this.AnoSeleccionado}/${this.PeriodoSeleccionado}`).subscribe({
+                  next:(response:Respuesta) => {
+                    if(response.Success){
+                      this.popUp.close();
+                      this.dialogConfig.data = response.Data as string;
+                      this.dialog.open(ModalDocumentViewerComponent, this.dialogConfig);
+                    }
+                  }, error: () => {
+                    this.popUp.error("No se ha podido generar el PDF.")
+                  }
+                });
+              }
+            });
           }
+        }, error: () => {
+          this.popUp.error("No se ha podido consultar la facultad homologada.")
         }
-      })
+      });
     }
   }
 
