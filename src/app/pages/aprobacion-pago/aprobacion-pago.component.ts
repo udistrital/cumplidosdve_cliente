@@ -27,7 +27,7 @@ export class AprobacionPagoComponent implements OnInit {
   CumplidosSelected: any = [];
   Meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
   MesSeleccionado: any = null;
-  Anos = [(new Date().getFullYear()), (new Date().getFullYear()) + 1];
+  Anos = [(new Date().getFullYear())];
   AnoSeleccionado: any = null;
   Periodos = [];
   PeriodoSeleccionado: any = null;
