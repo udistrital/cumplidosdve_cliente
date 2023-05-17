@@ -209,19 +209,28 @@ export class AprobacionPagoComponent implements OnInit {
                     cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
                     cumplido.FechaModificacion = new Date();
 
-                    //APRUEBA LA SOLICITUD
-                    this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
+                    //ENVÍA A TITAN
+                    this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/enviar_titan`, cumplido).subscribe({
                       next: (response: Respuesta) => {
                         if(response.Success){
-                          this.popUp.close();
-                          this.popUp.success("El pago ha sido aprobado.").then(() => {
-                            this.ngOnInit();
+                          //APRUEBA LA SOLICITUD
+                          this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
+                            next: (response: Respuesta) => {
+                              if(response.Success){
+                                this.popUp.close();
+                                this.popUp.success("El pago ha sido aprobado.").then(() => {
+                                  this.ngOnInit();
+                                });
+                              }
+                            }, error: () => {
+                              this.popUp.error("No se ha podido aprobar el pago.");
+                            }
                           });
                         }
                       }, error: () => {
                         this.popUp.error("No se ha podido aprobar el pago.");
                       }
-                    })
+                    });
                   }
                 }, error: () => {
                   this.popUp.error("No se ha podido consultar el parametro.")
