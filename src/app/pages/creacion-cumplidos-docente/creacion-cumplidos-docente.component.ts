@@ -182,7 +182,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
   }
 
   CargarMesesYDias(): void {
-    this.Ano_Inicial = (new Date(this.contrato[0].FechaInicio).getFullYear() + 1);
+    this.Ano_Inicial = (new Date(this.contrato[0].FechaInicio).getFullYear()) + 1;
     this.Ano_Final = new Date(this.contrato[0].FechaFin).getFullYear();
     
     for(var anio = this.Ano_Inicial; anio <= this.Ano_Final; anio++){
