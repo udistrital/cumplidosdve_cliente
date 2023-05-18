@@ -203,7 +203,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
   CrearSolicitud(): void {
     //VALIDA SI LOS CAMPOS ESTAN VACIOS
     if(this.MesSeleccionado == 0 || this.AnoSeleccionado == 0){
-      this.popUp.error("Se deben completar los campos año y mes para solicitar el cumplido.")
+      this.popUp.warning("Se deben completar los campos año y mes para solicitar el cumplido.")
     }else{
       this.popUp.loading()
       //TOMAR EL VALOR DEL MES SELECCIONADO
