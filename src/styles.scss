@@ -166,9 +166,8 @@ ul {
   display: flex;
   padding: 12px 0px;
   top: -14px;
-  left: -16px;
   flex-wrap: wrap-reverse;
-  width: 100vw;
+  width: 98vw;
   font-size: 0.8rem;
 }
 
@@ -220,11 +219,6 @@ a {
 @media screen and (max-width: 425px) {
   table tbody tr td {
     font-size: 0.675em !important;
-  }
-}
-@media screen and (min-width: 1024px) {
-  .username-info {
-    display: none;
   }
 }
 
