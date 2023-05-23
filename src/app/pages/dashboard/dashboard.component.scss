@@ -1,0 +1,29 @@
+.container-welcome{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card{
+    width: 70%;
+}
+
+.title{
+    text-align: center;
+}
+
+.text{
+    font-size: x-large;
+    margin-left: 60px;
+    margin-right: 20px;
+    margin-top: 10px;
+}
+
+.manual{
+    margin-left: 60px;
+    margin-right: 20px;
+    font-size: x-large;
+    text-decoration: none;
+    color: var(--primary);
+}

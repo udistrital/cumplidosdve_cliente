@@ -1,13 +1,27 @@
-import { Tercero } from './tercero';
-import { TipoDocumento } from './tipo_documento';
+import { Estado } from "./estado";
+
 
 export class DatosIdentificacion {
   Id: number;
-  TipoDocumentoId: TipoDocumento;
-  TerceroId: Tercero;
-  Numero: string;
-  //DigitoVerificacion: number; 
-  //CiudadExpedicion: number;  
-  FechaExpedicion: string;
-  //DocumentoSoporte: number;
+  Tipopersona: string;
+  NumDocumento: string;
+  IdCiudadContacto: number;
+  Direccion: string;
+  Correo: string;
+  Web: string;
+  NomAsesor: string;
+  TelAsesor: string;
+  Descripcion: string;
+  PuntajeEvaluacion: number;
+  ClasificacionEvaluacion: string;
+  Estado: Estado;
+  TipoCuentaBancaria: string;
+  NumCuentaBancaria: string;
+  IdEntidadBancaria: number;
+  FechaRegistro: string;
+  FechaUltimaModificacion: string;
+  NomProveedor: string;
+  Anexorut: string;
+  Anexorup: string;
+  RegimenContributivo: string;
 }

@@ -94,10 +94,10 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
         position: 'right',
         columnTitle: 'Acciones',
         custom: [
-          {
+          /*{
             name: 'Ver-Soportes',
             title: '<em title="Ver Soportes"><button mat-button type="button"><i class="fa-regular fa-folder-open"></i></button></em>',
-          },
+          },*/
           {
             name: 'Enviar-Cumplido',
             title: '<em title="Enviar" class="enviar-cumplido"><button mat-button type="button"><i id="enviar" class="fas fa-paper-plane"></i></button></em>',
@@ -135,7 +135,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
   }
   ConsultarCumplidos(): void {
     this.popUp.loading();
-    this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=numero_contrato:${this.information.NumeroVinculacion},vigencia_contrato:${this.information.Vigencia}`).subscribe({
+    this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=numero_contrato:${this.information.NumeroVinculacion},vigencia_contrato:${this.information.Vigencia}&limit=-1`).subscribe({
       next: (response: Respuesta) => {
         if (response.Success){
           if (response.Data == null || (response.Data as any[]).length === 0){
@@ -207,7 +207,8 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
     }else{
       this.popUp.loading()
       //TOMAR EL VALOR DEL MES SELECCIONADO
-      for(var key = 0; key < 12; key++){
+      
+      for(var key = 0; key <= 12; key++){
         if(this.Mes[key] == this.MesSeleccionado){
           this.MesSeleccionado = key;
         }
