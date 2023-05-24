@@ -9,7 +9,7 @@ import { DatosIdentificacion } from '../@core/models/datos_identificacion';
 @Component({
   selector: 'app-pages',
   template: `<div *ngIf="loaded" class="main-container">
-              <div class="username-info">Bienvenido <br>{{terceroName}}</div>
+              <div class="username-info">Bienvenido <br>{{Name}}</div>
               <router-outlet></router-outlet>
             </div>`,
 })
@@ -18,7 +18,7 @@ export class PagesComponent implements OnInit {
   userData: any;
   environment: any;
   loadingRouter: boolean;
-  terceroName: string = '';
+  Name: string = '';
  
 
   constructor(    private router: Router, private userService:UserService,
@@ -49,11 +49,10 @@ export class PagesComponent implements OnInit {
 
     this.userService.user$.subscribe((data: any)=> {
       if(data?data.userService?data.userService.documento?true:false:false:false) {
-        this.request.get(environment.TERCEROS_SERVICE, `datos_identificacion?query=Numero:`+ data.userService.documento)
+        this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `informacion_proveedor?query=NumDocumento:`+ data.userService.documento)
         .subscribe((datosIdentificacion: DatosIdentificacion)=> {
-          let tercero = datosIdentificacion[0].TerceroId;
-          this.terceroName = tercero?tercero.NombreCompleto?tercero.NombreCompleto:'':'';
-          this.userService.updateTercero(tercero);
+          let Nombre = datosIdentificacion[0].NomProveedor;
+          this.Name = Nombre;
         })
       }
     })
