@@ -7,7 +7,15 @@
             <p class="text">Se realizaron cambios en la interfaz de usuario, que no interfieren con el flujo de carga de los cumplidos de los Docentes de Vinculación Especial.
                 Los invitamos a mirar los siguientes manuales de usuario:</p>
             <mat-list>
-                <mat-list-item><a class="manual" href="#">- Manual de usuario</a></mat-list-item>
+                <div *ngFor="let rol of roles">
+                    <mat-list-item *ngIf="rol == 'DOCENTE'"><a class="manual" href="https://ti.udistrital.edu.co/sites/default/files/documentacion/2023-05/Solicitud%20Cumplidos%20(Docentes).pdf">- Manual de Docente</a></mat-list-item>
+                    <mat-list-item *ngIf="rol == 'COORDINADOR'"><a class="manual" href="https://tinyurl.com/289p3h5x">- Manual de Coordinador/a</a></mat-list-item>
+                    <mat-list-item *ngIf="rol == 'COORDINADOR_PREGRADO'"><a class="manual" href="https://tinyurl.com/289p3h5x">- Manual de Coordinador Pregrado</a></mat-list-item>
+                    <mat-list-item *ngIf="rol == 'COORDINADOR_POSGRADO'"><a class="manual" href="https://tinyurl.com/289p3h5x">- Manual de Coordinador Posgrado</a></mat-list-item>
+                    <mat-list-item *ngIf="rol == 'SUPERVISOR'"><a class="manual" href="https://tinyurl.com/3w7puww9">- Manual de Supervisor</a></mat-list-item>
+                    <mat-list-item *ngIf="rol == 'DECANO'"><a class="manual" href="https://tinyurl.com/58s54u5h">- Manual de Decano</a></mat-list-item>
+                    <mat-list-item *ngIf="rol == 'ORDENADOR_DEL_GASTO'"><a class="manual" href="https://tinyurl.com/58s54u5h">- Manual de Ordenador del gasto</a></mat-list-item>
+                </div>
             </mat-list>
         </mat-card-content>
     </mat-card>

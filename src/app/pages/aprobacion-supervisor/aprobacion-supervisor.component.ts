@@ -165,7 +165,7 @@ export class AprobacionSupervisorComponent implements OnInit {
                               if (response.Success) {
                                 this.popUp.close();
                                 this.popUp.success("El cumplido ha sido aprobado.").then(() => {
-                                  this.ngOnInit();
+                                  window.location.reload();
                                 });
                               }
                             }, error: () => {
@@ -226,7 +226,7 @@ export class AprobacionSupervisorComponent implements OnInit {
                         if(response.Success){
                           this.popUp.close();
                           this.popUp.success("El cumplido ha sido rechazado.").then(() => {
-                            this.ngOnInit();
+                            window.location.reload();
                           });
                         }
                       }, error: () => {
@@ -314,7 +314,7 @@ export class AprobacionSupervisorComponent implements OnInit {
                 this.popUp.close();
                 this.popUp.success("Los cumplidos seleccionados han sido aprobados.").then(() => {
                   this.CumplidosSelected = [];
-                  this.ngOnInit();
+                  window.location.reload();
                 });
               }
             }, error: () => {
