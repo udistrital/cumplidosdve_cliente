@@ -219,7 +219,7 @@ export class AprobacionPagoComponent implements OnInit {
                               if(response.Success){
                                 this.popUp.close();
                                 this.popUp.success("El pago ha sido aprobado.").then(() => {
-                                  this.ngOnInit();
+                                  window.location.reload();
                                 });
                               }
                             }, error: () => {
@@ -279,7 +279,7 @@ export class AprobacionPagoComponent implements OnInit {
                         if(response.Success){
                           this.popUp.close();
                           this.popUp.success("El pago ha sido rechazado.").then(() => {
-                            this.ngOnInit();
+                            window.location.reload();
                           });
                         }
                       }, error: () => {
@@ -353,7 +353,7 @@ export class AprobacionPagoComponent implements OnInit {
                 this.popUp.close();
                 this.popUp.success("Los cumplidos seleccionados han sido aprobados para el pago").then(() => {
                   this.CumplidosSelected = [];
-                  this.ngOnInit();
+                  window.location.reload();
                 });
               }
             }, error: () => {
