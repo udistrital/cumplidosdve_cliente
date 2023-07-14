@@ -165,7 +165,7 @@ export class AprobacionSupervisorComponent implements OnInit {
                               if (response.Success) {
                                 this.popUp.close();
                                 this.popUp.success("El cumplido ha sido aprobado.").then(() => {
-                                  this.ngOnInit();
+                                  window.location.reload();
                                 });
                               }
                             }, error: () => {
@@ -226,7 +226,7 @@ export class AprobacionSupervisorComponent implements OnInit {
                         if(response.Success){
                           this.popUp.close();
                           this.popUp.success("El cumplido ha sido rechazado.").then(() => {
-                            this.ngOnInit();
+                            window.location.reload();
                           });
                         }
                       }, error: () => {
@@ -264,10 +264,11 @@ export class AprobacionSupervisorComponent implements OnInit {
             }
             
             //CONSULTA AL ORDENADOR DEL GASTO
-            this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
-              next: (response: Respuesta) => {
-                if(response.Success){
-                  ordenador = String(response.Data.NumeroDocumento)
+            //this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
+              //next: (response: Respuesta) => {
+                //if(response.Success){
+                  //ordenador = String(response.Data.NumeroDocumento)
+                  ordenador = '52310001';
 
                   //CAMBIA EL ESTADO Y AJUSTA VALORES
                   cumplido.Responsable = ordenador;
@@ -276,9 +277,9 @@ export class AprobacionSupervisorComponent implements OnInit {
                   cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
                   cumplido.FechaModificacion = new Date();
                   this.CumplidosSelected.push(cumplido);
-                }
-              }
-            });
+                //}
+              //}
+            //});
           }
         }
       });
@@ -313,7 +314,7 @@ export class AprobacionSupervisorComponent implements OnInit {
                 this.popUp.close();
                 this.popUp.success("Los cumplidos seleccionados han sido aprobados.").then(() => {
                   this.CumplidosSelected = [];
-                  this.ngOnInit();
+                  window.location.reload();
                 });
               }
             }, error: () => {

@@ -29,7 +29,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
   Proyectos_Curriculares = [];
   Meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
   MesSeleccionado: any = null;
-  Anos = [(new Date().getFullYear()), (new Date().getFullYear()) + 1];
+  Anos = [(new Date().getFullYear())];
   AnoSeleccionado: any = null;
   Periodos = [];
   PeriodoSeleccionado: any = null;
@@ -111,7 +111,6 @@ export class AprobacionCoordinadorComponent implements OnInit {
               this.NombreCoordinador = response.coordinadorCollection.coordinador[0].nombre_coordinador;
               this.Proyectos_Curriculares = response.coordinadorCollection.coordinador;
         }, error: () => {
-          this.popUp.close();
           this.popUp.error('No se ha podido consultar al coordinador.');
         }
       });
@@ -230,7 +229,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
                             if (response.Success) {
                               this.popUp.close();
                               this.popUp.success("El cumplido ha sido aprobado.").then(() => {
-                                this.ngOnInit();
+                                window.location.reload();
                               });
                             }
                           }, error: () => {
@@ -286,7 +285,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
                         if(response.Success){
                           this.popUp.close();
                           this.popUp.success("El cumplido ha sido rechazado.").then(() => {
-                            this.ngOnInit();
+                            window.location.reload();
                           });
                         }
                       }, error: () => {
@@ -365,7 +364,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
                 this.popUp.close();
                 this.popUp.success("Los cumplidos seleccionados han sido aprobados.").then(() => {
                   this.CumplidosSelected = [];
-                  this.ngOnInit();
+                  window.location.reload();
                 });
               }
             }, error: () => {

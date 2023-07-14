@@ -27,7 +27,7 @@ export class AprobacionPagoComponent implements OnInit {
   CumplidosSelected: any = [];
   Meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
   MesSeleccionado: any = null;
-  Anos = [(new Date().getFullYear()), (new Date().getFullYear()) + 1];
+  Anos = [(new Date().getFullYear())];
   AnoSeleccionado: any = null;
   Periodos = [];
   PeriodoSeleccionado: any = null;
@@ -209,19 +209,28 @@ export class AprobacionPagoComponent implements OnInit {
                     cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
                     cumplido.FechaModificacion = new Date();
 
-                    //APRUEBA LA SOLICITUD
-                    this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
+                    //ENVÍA A TITAN
+                    this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/enviar_titan`, cumplido).subscribe({
                       next: (response: Respuesta) => {
                         if(response.Success){
-                          this.popUp.close();
-                          this.popUp.success("El pago ha sido aprobado.").then(() => {
-                            this.ngOnInit();
+                          //APRUEBA LA SOLICITUD
+                          this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
+                            next: (response: Respuesta) => {
+                              if(response.Success){
+                                this.popUp.close();
+                                this.popUp.success("El pago ha sido aprobado.").then(() => {
+                                  window.location.reload();
+                                });
+                              }
+                            }, error: () => {
+                              this.popUp.error("No se ha podido aprobar el pago.");
+                            }
                           });
                         }
                       }, error: () => {
                         this.popUp.error("No se ha podido aprobar el pago.");
                       }
-                    })
+                    });
                   }
                 }, error: () => {
                   this.popUp.error("No se ha podido consultar el parametro.")
@@ -270,7 +279,7 @@ export class AprobacionPagoComponent implements OnInit {
                         if(response.Success){
                           this.popUp.close();
                           this.popUp.success("El pago ha sido rechazado.").then(() => {
-                            this.ngOnInit();
+                            window.location.reload();
                           });
                         }
                       }, error: () => {
@@ -344,7 +353,7 @@ export class AprobacionPagoComponent implements OnInit {
                 this.popUp.close();
                 this.popUp.success("Los cumplidos seleccionados han sido aprobados para el pago").then(() => {
                   this.CumplidosSelected = [];
-                  this.ngOnInit();
+                  window.location.reload();
                 });
               }
             }, error: () => {
