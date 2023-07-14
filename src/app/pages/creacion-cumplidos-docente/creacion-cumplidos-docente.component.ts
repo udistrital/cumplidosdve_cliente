@@ -38,6 +38,8 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
   //VARIABLES
   information: any;
   contrato:any = [];
+  Fecha_Inicio: any;
+  Fecha_Fin: any;
   Ano_Inicial: any;
   Ano_Final: any;
   Mes_Inicial: any;
@@ -182,8 +184,15 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
   }
 
   CargarMesesYDias(): void {
-    this.Ano_Inicial = (new Date(this.contrato[0].FechaInicio).getFullYear()) + 1;
-    this.Ano_Final = new Date(this.contrato[0].FechaFin).getFullYear();
+    //TOMA LA FECHA DE INICIO DEL CONTRATO
+    this.Fecha_Inicio = new Date(this.contrato[0].FechaInicio);
+    this.Fecha_Inicio.setHours(this.Fecha_Inicio.getHours() + 5);
+    this.Ano_Inicial = this.Fecha_Inicio.getFullYear();
+
+    //TOMA LA FECHA FIN DEL CONTRATO
+    this.Fecha_Fin = new Date(this.contrato[0].FechaFin);
+    this.Fecha_Fin.setHours(this.Fecha_Fin.getHours() + 5);
+    this.Ano_Final = this.Fecha_Fin.getFullYear();
     
     for(var anio = this.Ano_Inicial; anio <= this.Ano_Final; anio++){
       this.Data_Anos.push(anio);
