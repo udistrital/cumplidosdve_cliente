@@ -146,11 +146,10 @@ export class AprobacionSupervisorComponent implements OnInit {
                     }
 
                     //CONSULTA AL ORDENADOR DEL GASTO
-                    //this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
-                      //next: (response: Respuesta) => {
-                        //if(response.Success){
-                          //ordenador = String(response.Data.NumeroDocumento);
-                          ordenador = '52310001';
+                    this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
+                      next: (response: Respuesta) => {
+                        if(response.Success){
+                          ordenador = String(response.Data.NumeroDocumento);
 
                           //CAMBIA EL ESTADO Y AJUSTA VALORES
                           cumplido.Responsable = ordenador;
@@ -172,12 +171,12 @@ export class AprobacionSupervisorComponent implements OnInit {
                               this.popUp.error("No se ha podido aprobar el cumplido.");
                             }
                           });
-                        //}
-                      //}, error: () => {
-                      //  this.popUp.error("No se ha podido aprobar el cumplido.");
-                      //  console.log("No se ha podido consultar el Ordenador.");
-                      //}
-                    //});
+                        }
+                      }, error: () => {
+                        this.popUp.error("No se ha podido aprobar el cumplido.");
+                        console.log("No se ha podido consultar el Ordenador.");
+                      }
+                    });
                   }
                 }, error: () => {
                   console.log("No se ha podido consultar el parametro.");
@@ -264,11 +263,10 @@ export class AprobacionSupervisorComponent implements OnInit {
             }
             
             //CONSULTA AL ORDENADOR DEL GASTO
-            //this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
-              //next: (response: Respuesta) => {
-                //if(response.Success){
-                  //ordenador = String(response.Data.NumeroDocumento)
-                  ordenador = '52310001';
+            this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
+              next: (response: Respuesta) => {
+                if(response.Success){
+                  ordenador = String(response.Data.NumeroDocumento)
 
                   //CAMBIA EL ESTADO Y AJUSTA VALORES
                   cumplido.Responsable = ordenador;
@@ -277,9 +275,9 @@ export class AprobacionSupervisorComponent implements OnInit {
                   cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
                   cumplido.FechaModificacion = new Date();
                   this.CumplidosSelected.push(cumplido);
-                //}
-              //}
-            //});
+                }
+              }
+            });
           }
         }
       });
