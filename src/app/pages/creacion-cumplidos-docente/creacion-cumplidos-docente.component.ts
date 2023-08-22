@@ -179,6 +179,8 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
         if(response.Success){
           this.coordinador = response.Data;
         }
+      }, error: () => {
+        this.popUp.error("No se ha podido consultar el Coordinador.")
       }
     });
   }
