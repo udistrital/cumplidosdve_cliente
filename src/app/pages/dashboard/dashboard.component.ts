@@ -22,9 +22,8 @@ export class DashboardComponent implements OnInit {
   consultarRol(): void {
     this.userService.user$.subscribe((data:any) => {
       if(data ? data.userService ? data.userService.documento ? true : false : false : false){
-
         //UNIR ROLES
-        this.roles = data.user.role;
+        this.roles = data.userService.role;
         for(var i = 0; i<data.userService.role.length; i++){
           if(!this.roles.includes(data.userService.role[i])){
             this.roles.push(data.userService.role[i]);
