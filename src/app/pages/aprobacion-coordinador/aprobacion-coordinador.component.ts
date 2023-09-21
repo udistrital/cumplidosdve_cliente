@@ -154,6 +154,8 @@ export class AprobacionCoordinadorComponent implements OnInit {
           this.request.get(environment.OIKOS_SERVICE, `dependencia_padre/?query=Hija:${Oikos}`).subscribe({
             next:(response:any) =>{
               Facultad = response[0].Padre.Nombre;
+              //QUITAR LAS COMAS DE LA URL
+              ProyectoCurricular = ProyectoCurricular.replace(/,/g, '');
               this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/generar_certificado/${this.NombreCoordinador}/${ProyectoCurricular}/${Oikos}/${Facultad}/${this.MesSeleccionado}/${this.AnoSeleccionado}/${this.PeriodoSeleccionado}`).subscribe({
                 next:(response:Respuesta) => {
                   if(response.Success){
