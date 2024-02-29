@@ -148,6 +148,8 @@ export class AprobacionPagoComponent implements OnInit {
             this.request.get(environment.OIKOS_SERVICE, `dependencia/${facultad_homologada}`).subscribe({
               next:(response:any) => {
                 dependencia = response.Nombre;
+                //QUITAR LOS PARENTESIS DE LA URL
+                this.NombreOrdenador = this.NombreOrdenador.replace(/\(|\)/g, '');
                 this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/generar_certificado/${this.NombreOrdenador}/${facultad_homologada}/${dependencia}/${this.MesSeleccionado}/${this.AnoSeleccionado}/${this.PeriodoSeleccionado}`).subscribe({
                   next:(response:Respuesta) => {
                     if(response.Success){
