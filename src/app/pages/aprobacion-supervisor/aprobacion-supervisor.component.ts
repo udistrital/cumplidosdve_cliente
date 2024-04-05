@@ -159,9 +159,9 @@ export class AprobacionSupervisorComponent implements OnInit {
                     //CONSULTA AL ORDENADOR DEL GASTO
                     this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
                       next: (response: Respuesta) => {
-                        if (response.Success) {
+
+                        if(response.Success){
                           ordenador = String(response.Data.NumeroDocumento);
-                          //  ordenador = '52310001';
 
                           //CAMBIA EL ESTADO Y AJUSTA VALORES
                           cumplido.Responsable = ordenador;
