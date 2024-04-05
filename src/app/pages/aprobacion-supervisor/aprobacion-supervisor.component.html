@@ -14,10 +14,10 @@
                     <h3>Peticiones</h3>
                 </mat-card-title>
                 <mat-card-content>
-                    <ng2-smart-table [settings]="PeticionesSupervisorSettings" [source]="PeticionesSupervisorData" (custom)="Acciones($event)" (userRowSelect)="CumplidosSeleccionados($event)"></ng2-smart-table>
-                    <button mat-raised-button class="send" (click)="AprobarMultiplesCumplidos()">Aprobar Cumplidos</button>
+                    <ng2-smart-table [settings]="PeticionesSupervisorSettings" [source]="PeticionesSupervisorData" (custom)="Acciones($event)" (userRowSelect)="CumplidosSeleccionados($event)"  ></ng2-smart-table>
+                    <button  mat-raised-button class="send" (click)="AprobarMultiplesCumplidos()" [disabled]="DeshabilitarBoton">Aprobar Cumplidos</button>
                 </mat-card-content>
             </mat-card>
         </div>
     </mat-card-content>
-</mat-card>
+</mat-card> 

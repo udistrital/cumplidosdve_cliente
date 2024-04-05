@@ -16,6 +16,7 @@ export class AprobacionSupervisorComponent implements OnInit {
 
   //SETTINGS
   PeticionesSupervisorSettings: any;
+  DeshabilitarBoton: boolean = false;
 
   //DATA
   PeticionesSupervisorData: LocalDataSource;
@@ -109,6 +110,16 @@ export class AprobacionSupervisorComponent implements OnInit {
     });
   }
 
+  //SUSCRIPCION A LOS EVENTOS DE LOS DATOS DE LA TABLA
+  SuscribeEventosData() {
+    this.PeticionesSupervisorData.onChanged().subscribe(change => {
+      switch (change.action) {
+        case 'page':
+          this.CumplidosSelected = [];
+      }
+    });
+  }
+
   Acciones(event): void {
     switch(event.action){
       case "Aprobar":{
@@ -146,11 +157,11 @@ export class AprobacionSupervisorComponent implements OnInit {
                     }
 
                     //CONSULTA AL ORDENADOR DEL GASTO
-                    //this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
-                      //next: (response: Respuesta) => {
-                        //if(response.Success){
-                          //ordenador = String(response.Data.NumeroDocumento);
-                          ordenador = '52310001';
+                    this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
+                      next: (response: Respuesta) => {
+                        if (response.Success) {
+                          ordenador = String(response.Data.NumeroDocumento);
+                          //  ordenador = '52310001';
 
                           //CAMBIA EL ESTADO Y AJUSTA VALORES
                           cumplido.Responsable = ordenador;
@@ -172,12 +183,12 @@ export class AprobacionSupervisorComponent implements OnInit {
                               this.popUp.error("No se ha podido aprobar el cumplido.");
                             }
                           });
-                        //}
-                      //}, error: () => {
-                      //  this.popUp.error("No se ha podido aprobar el cumplido.");
-                      //  console.log("No se ha podido consultar el Ordenador.");
-                      //}
-                    //});
+                        }
+                      }, error: () => {
+                        this.popUp.error("No se ha podido aprobar el cumplido.");
+                        console.log("No se ha podido consultar el Ordenador.");
+                      }
+                    });
                   }
                 }, error: () => {
                   console.log("No se ha podido consultar el parametro.");
@@ -219,7 +230,7 @@ export class AprobacionSupervisorComponent implements OnInit {
                     cumplido.EstadoPagoMensualId = parametro[0].Id;
                     cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
                     cumplido.FechaModificacion = new Date();
-                    
+
                     //RECHAZA LA SOLICITUD
                     this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
                       next: (response: Respuesta) => {
@@ -244,64 +255,135 @@ export class AprobacionSupervisorComponent implements OnInit {
       }
     })
   }
+
+
+  // ELIMINA LOS CMPLIDOS EN EL ARRAY DE APROBACION MULTIPLE
+  ClearSelectedCumplidos(): void {
+    this.CumplidosSelected = [];
+  }
+
+
   CumplidosSeleccionados(event): void {
+
+
     //VARIABLES
     var parametro: any;
     var cumplido: any;
     var ordenador: any;
 
-    if(event.isSelected){
-      //GUARDA EL CUMPLIDO
-      cumplido = event.data.PagoMensual;
+    if (event.isSelected === null) {
+      if (event.selected.length > 0) {
+        this.CumplidosSelected = [];
+        this.DeshabilitarBoton = true;
+        let cumplidosPromises = event.selected.map(cumplido => {
+          return new Promise((resolve, reject) => {
+            this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PAD_DVE,Nombre:POR APROBAR DECANO(A)`).subscribe({
+              next: (response) => {
+                if (response.Success) {
+                  let parametro = response.Data;
+                  if (parametro.length === 0) {
+                    console.log("No se ha encontrado el parámetro.");
+                  }
 
-      //CONSULTA EL PARAMETRO
-      this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PAD_DVE,Nombre:POR APROBAR DECANO(A)`).subscribe({
-        next: (response: Respuesta) => {
-          if(response.Success){
-            parametro = response.Data;
-            if ((response.Data as any[]).length === 0) {
-              console.log("No se ha encontrado el parametro.");
+                  this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.PagoMensual.NumeroContrato}/${cumplido.PagoMensual.VigenciaContrato}`).subscribe({
+                    next: (response) => {
+                      if (response.Success) {
+                        let ordenador = String(response.Data.NumeroDocumento);
+                        cumplido.PagoMensual.Responsable = ordenador;
+                        cumplido.PagoMensual.CargoResponsable = "ORDENADOR DEL GASTO";
+                        cumplido.PagoMensual.EstadoPagoMensualId = parametro[0].Id;
+                        cumplido.PagoMensual.FechaCreacion = new Date(cumplido.PagoMensual.FechaCreacion);
+                        cumplido.PagoMensual.FechaModificacion = new Date();
+                        this.CumplidosSelected.push(cumplido.PagoMensual);
+                        resolve(undefined);
+                      }
+                    },
+                    error: (error) => {
+                      reject(error);
+                    }
+                  });
+                }
+              },
+              error: (error) => {
+                reject(error);
+              }
+            });
+          });
+        });
+
+        Promise.all(cumplidosPromises)
+          .then(() => {
+            console.log("Peticiones de cumplidos procesadas.");
+            this.DeshabilitarBoton = false;
+          })
+          .catch(error => {
+            console.error("Error al procesar las peticiones:", error);
+            this.DeshabilitarBoton = true;
+          });
+      }
+
+      if (event.selected.length === 0) {
+        this.ClearSelectedCumplidos();
+      }
+    }
+    else {
+      if (event.isSelected) {
+        //GUARDA EL CUMPLIDO
+        cumplido = event.data.PagoMensual;
+
+        //CONSULTA EL PARAMETRO
+        this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PAD_DVE,Nombre:POR APROBAR DECANO(A)`).subscribe({
+          next: (response: Respuesta) => {
+            if(response.Success){
+              parametro = response.Data;
+              if ((response.Data as any[]).length === 0) {
+                console.log("No se ha encontrado el parametro.");
+              }
+
+              //CONSULTA AL ORDENADOR DEL GASTO
+              this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
+                next: (response: Respuesta) => {
+                  if (response.Success) {
+                    ordenador = String(response.Data.NumeroDocumento)
+                    // ordenador = '52310001';
+
+                    //CAMBIA EL ESTADO Y AJUSTA VALORES
+                    cumplido.Responsable = ordenador;
+                    cumplido.CargoResponsable = "ORDENADOR DEL GASTO";
+                    cumplido.EstadoPagoMensualId = parametro[0].Id;
+                    cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
+                    cumplido.FechaModificacion = new Date();
+                    this.CumplidosSelected.push(cumplido);
+                  }
+                }
+              });
             }
-            
-            //CONSULTA AL ORDENADOR DEL GASTO
-            //this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
-              //next: (response: Respuesta) => {
-                //if(response.Success){
-                  //ordenador = String(response.Data.NumeroDocumento)
-                  ordenador = '52310001';
-
-                  //CAMBIA EL ESTADO Y AJUSTA VALORES
-                  cumplido.Responsable = ordenador;
-                  cumplido.CargoResponsable = "ORDENADOR DEL GASTO";
-                  cumplido.EstadoPagoMensualId = parametro[0].Id;
-                  cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
-                  cumplido.FechaModificacion = new Date();
-                  this.CumplidosSelected.push(cumplido);
-                //}
-              //}
-            //});
+          }
+        });
+      } else {
+        //ELIMINA EL CUMPLIDO
+        for (var i = 0; i < this.CumplidosSelected.length; i++) {
+          if (this.CumplidosSelected[i] != null && this.CumplidosSelected[i].Id == event.data.PagoMensual.Id) {
+            delete this.CumplidosSelected[i];
           }
         }
-      });
-    }else{
-      //ELIMINA EL CUMPLIDO
-      for(var i = 0; i < this.CumplidosSelected.length; i++){
-        if(this.CumplidosSelected[i] != null && this.CumplidosSelected[i].Id == event.data.PagoMensual.Id){
-          delete this.CumplidosSelected[i];
+        //VUELVE A ARMAR EL ARRAY SIN ESPACIOS EN BLANCO
+        var cont = 0;
+        var cumplidos_nuevo = [];
+        for (var i = 0; i < this.CumplidosSelected.length; i++) {
+          if (this.CumplidosSelected[i] != null) {
+            cumplidos_nuevo[cont] = this.CumplidosSelected[i];
+            cont++;
+          }
         }
+        this.CumplidosSelected = cumplidos_nuevo;
       }
-      //VUELVE A ARMAR EL ARRAY SIN ESPACIOS EN BLANCO
-      var cont = 0;
-      var cumplidos_nuevo = [];
-      for(var i = 0; i < this.CumplidosSelected.length; i++){
-        if(this.CumplidosSelected[i] != null){
-          cumplidos_nuevo[cont] = this.CumplidosSelected[i];
-          cont++;
-        }
-      }
-      this.CumplidosSelected = cumplidos_nuevo;
+
     }
   }
+
+
+
   AprobarMultiplesCumplidos(): void {
     if(this.CumplidosSelected[0] == null){
       this.popUp.warning("Por favor seleccione un cumplido para aprobar.")
