@@ -142,7 +142,7 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
         if (response.Success){
           if (response.Data == null || (response.Data as any[]).length === 0){
             this.popUp.close();
-            this.popUp.warning("No existen cumplidos asociados al numero de contrato.");
+            this.popUp.warning("Seleccione el año y mes para solicitar su cumplido.");
           }else{
             this.CumplidosData = new LocalDataSource(response.Data);
             this.CambioEstado(this.CumplidosData);
@@ -179,6 +179,8 @@ export class CreacionCumplidosDocenteComponent implements OnInit {
         if(response.Success){
           this.coordinador = response.Data;
         }
+      }, error: () => {
+        this.popUp.error("No se ha podido consultar el Coordinador.")
       }
     });
   }
