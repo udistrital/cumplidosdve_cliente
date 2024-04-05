@@ -72,7 +72,7 @@ export class AprobacionSupervisorComponent implements OnInit {
   consultarNumeroDocumento(): void {
     this.popUp.loading();
     this.userService.user$.subscribe((data: any) => {
-      if (data ? data.userService ? data.userService.documento ? true : false : false : false) {
+      if (data && data.userService && data.userService.documento) {
         this.DocumentoSupervisor = data.userService.documento;
       }
     });
