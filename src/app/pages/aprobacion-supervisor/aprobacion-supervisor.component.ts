@@ -116,7 +116,6 @@ export class AprobacionSupervisorComponent implements OnInit {
     this.PeticionesSupervisorData.onChanged().subscribe(change => {
       switch (change.action) {
         case 'page':
-          console.log("evento cambio pag");
           this.CumplidosSelected = [];
       }
     });
