@@ -101,6 +101,7 @@ export class AprobacionSupervisorComponent implements OnInit {
             this.popUp.warning("No se han encontrado peticiones para el supervisor.");
           } else {
             this.PeticionesSupervisorData = new LocalDataSource(response.Data)
+            this.SuscribeEventosData();
           }
         }
       }, error: () => {
@@ -115,6 +116,7 @@ export class AprobacionSupervisorComponent implements OnInit {
     this.PeticionesSupervisorData.onChanged().subscribe(change => {
       switch (change.action) {
         case 'page':
+          console.log("evento cambio pag");
           this.CumplidosSelected = [];
       }
     });
