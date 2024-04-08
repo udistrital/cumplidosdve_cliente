@@ -278,6 +278,7 @@ export class AprobacionSupervisorComponent implements OnInit {
         this.DeshabilitarBoton = true;
         let cumplidosPromises = event.selected.map(cumplido => {
           return new Promise((resolve, reject) => {
+            this.popUp.loading();
             this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PAD_DVE,Nombre:POR APROBAR DECANO(A)`).subscribe({
               next: (response) => {
                 if (response.Success) {
@@ -315,6 +316,7 @@ export class AprobacionSupervisorComponent implements OnInit {
         Promise.all(cumplidosPromises)
           .then(() => {
             this.DeshabilitarBoton = false;
+            this.popUp.close();
           })
           .catch(error => {
             this.popUp.error("Error al seleccionar cumplidos").then(() => {
