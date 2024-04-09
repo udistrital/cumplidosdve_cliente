@@ -18,6 +18,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
 
   //SETTINGS
   PeticionesSettings: any;
+  DeshabilitarBoton: boolean = false;
   dialogConfig: MatDialogConfig;
 
   //DATA
@@ -25,7 +26,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
   NombreCoordinador = '';
   documentoCoordinador = '';
   documentoSupervisor: any;
-  CumplidosSelected : any = [];
+  CumplidosSelected: any = [];
   Proyectos_Curriculares = [];
   Meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
   MesSeleccionado: any = null;
@@ -89,14 +90,14 @@ export class AprobacionCoordinadorComponent implements OnInit {
   GenerarPeriodos(): void {
     var AnoActual = new Date().getFullYear();
     var AnoProximo = new Date().getFullYear() + 1;
-    this.Periodos[AnoActual] = [ AnoActual + "-3", AnoActual + "-1"]
-    this.Periodos[AnoProximo] = [ AnoProximo + "-3", AnoProximo + "-1"]
+    this.Periodos[AnoActual] = [AnoActual + "-3", AnoActual + "-1"]
+    this.Periodos[AnoProximo] = [AnoProximo + "-3", AnoProximo + "-1"]
   }
 
   consultarNumeroDocumento(): void {
     this.popUp.loading();
     this.userService.user$.subscribe((data: any) => {
-      if(data ? data.userService ? data.userService.documento ? true : false : false : false){
+      if (data ? data.userService ? data.userService.documento ? true : false : false : false) {
         this.documentoCoordinador = data.userService.documento;
       }
     });
@@ -107,9 +108,9 @@ export class AprobacionCoordinadorComponent implements OnInit {
     this.request.get(
       environment.ACADEMICA_JBPM_SERVICE, `coordinador_carrera_snies/${this.documentoCoordinador}`).subscribe({
         next: (response: any) => {
-              this.popUp.close();
-              this.NombreCoordinador = response.coordinadorCollection.coordinador[0].nombre_coordinador;
-              this.Proyectos_Curriculares = response.coordinadorCollection.coordinador;
+          this.popUp.close();
+          this.NombreCoordinador = response.coordinadorCollection.coordinador[0].nombre_coordinador;
+          this.Proyectos_Curriculares = response.coordinadorCollection.coordinador;
         }, error: () => {
           this.popUp.error('No se ha podido consultar al coordinador.');
         }
@@ -121,12 +122,13 @@ export class AprobacionCoordinadorComponent implements OnInit {
     this.request.get(
       environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/solicitudes_coordinador/${this.documentoCoordinador}`).subscribe({
         next: (response: Respuesta) => {
-          if(response.Success){
+          if (response.Success) {
             this.popUp.close();
-            if(response.Data == null || (response.Data as any).length === 0){
+            if (response.Data == null || (response.Data as any).length === 0) {
               this.popUp.warning("No se encontraron peticiones para el coordinador.");
-            }else{
+            } else {
               this.PeticionesData = new LocalDataSource(response.Data);
+              this.SuscribeEventosData();
             }
           }
         }, error: () => {
@@ -136,10 +138,20 @@ export class AprobacionCoordinadorComponent implements OnInit {
       });
   }
 
+  //SUSCRIPCION A LOS EVENTOS DE LOS DATOS DE LA TABLA
+  SuscribeEventosData() {
+    this.PeticionesData.onChanged().subscribe(change => {
+      switch (change.action) {
+        case 'page':
+          this.CumplidosSelected = [];
+      }
+    });
+  }
+
   GenerarCertificado(): void {
-    if(this.ProyectoCurricularSeleccionado == null || this.MesSeleccionado == null || this.AnoSeleccionado == null || this.PeriodoSeleccionado == null){
+    if (this.ProyectoCurricularSeleccionado == null || this.MesSeleccionado == null || this.AnoSeleccionado == null || this.PeriodoSeleccionado == null) {
       this.popUp.warning("Se deben de seleccionar todos los campos para generar el certificado.")
-    }else{
+    } else {
       //VARIABLES
       var Oikos = null;
       var ProyectoCurricular = null;
@@ -148,17 +160,17 @@ export class AprobacionCoordinadorComponent implements OnInit {
       this.popUp.loading();
 
       this.request.get(environment.DEPENDENCIAS_SERVICE, `proyecto_curricular_snies/${this.ProyectoCurricularSeleccionado}`).subscribe({
-        next:(response:any) => {
+        next: (response: any) => {
           Oikos = response.homologacion.id_oikos;
           ProyectoCurricular = response.homologacion.proyecto_snies;
           this.request.get(environment.OIKOS_SERVICE, `dependencia_padre/?query=Hija:${Oikos}`).subscribe({
-            next:(response:any) =>{
+            next: (response: any) => {
               Facultad = response[0].Padre.Nombre;
               //QUITAR LAS COMAS DE LA URL
               ProyectoCurricular = ProyectoCurricular.replace(/,/g, '');
               this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/generar_certificado/${this.NombreCoordinador}/${ProyectoCurricular}/${Oikos}/${Facultad}/${this.MesSeleccionado}/${this.AnoSeleccionado}/${this.PeriodoSeleccionado}`).subscribe({
-                next:(response:Respuesta) => {
-                  if(response.Success){
+                next: (response: Respuesta) => {
+                  if (response.Success) {
                     this.popUp.close();
                     this.dialogConfig.data = response.Data as string;
                     this.dialog.open(ModalDocumentViewerComponent, this.dialogConfig);
@@ -179,12 +191,12 @@ export class AprobacionCoordinadorComponent implements OnInit {
   }
 
   Acciones(event): void {
-    switch(event.action){
-      case "Aprobar":{
+    switch (event.action) {
+      case "Aprobar": {
         this.Aprobar(event);
         break;
       }
-      case "Rechazar":{
+      case "Rechazar": {
         this.Rechazar(event);
         break;
       }
@@ -211,7 +223,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
                   if (response.Success) {
                     parametro = response.Data;
                     if ((response.Data as any[]).length === 0) {
-                      console.log("No se ha encontrado el parametro.")
+                      this.popUp.error("No se ha encontrado el parámetro para cambio de estado.");
                     }
 
                     this.request.get(environment.ADMINISTRATIVA_JBPM_SERVICE, `contrato_elaborado/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
@@ -242,7 +254,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
                     });
                   }
                 }, error: () => {
-                  console.log("No se ha podido consultar el parametro.")
+                  this.popUp.error("No se ha encontrado el parámetro para cambio de estado.");
                 }
               });
             }
@@ -254,15 +266,15 @@ export class AprobacionCoordinadorComponent implements OnInit {
 
   Rechazar(event): void {
     this.popUp.confirm("Rechazar", "¿Está seguro que desea rechazar la solicitud de cumplido?", "rechazar").then(result => {
-      if(result.isConfirmed){
+      if (result.isConfirmed) {
         //VARIABLES
-        var cumplido :any;
-        var parametro : any;
+        var cumplido: any;
+        var parametro: any;
 
         //CONSULTAR PAGO MENSUAL
         this.request.get(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual/?query=Id:${event.data.PagoMensual.Id}`).subscribe({
-          next:(response: Respuesta) => {
-            if(response.Success){
+          next: (response: Respuesta) => {
+            if (response.Success) {
               cumplido = response.Data[0];
 
               //CONSULTAR EL PARAMETRO
@@ -271,7 +283,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
                   if (response.Success) {
                     parametro = response.Data;
                     if ((response.Data as any[]).length === 0) {
-                      console.log("No se ha encontrado el parametro.")
+                      this.popUp.error("No se ha encontrado el parámetro para cambio de estado.");
                     }
 
                     //CAMBIA EL ESTADO Y AJUSTA VALORES
@@ -284,7 +296,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
                     //RECHAZA LA SOLICITUD
                     this.request.put(environment.CUMPLIDOS_DVE_CRUD_SERVICE, `pago_mensual`, cumplido, event.data.PagoMensual.Id).subscribe({
                       next: (response: Respuesta) => {
-                        if(response.Success){
+                        if (response.Success) {
                           this.popUp.close();
                           this.popUp.success("El cumplido ha sido rechazado.").then(() => {
                             window.location.reload();
@@ -296,7 +308,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
                     });
                   }
                 }, error: () => {
-                  console.log("No se ha podido consultar el parametro.")
+                  this.popUp.error("No se ha encontrado el parámetro para cambio de estado.");
                 }
               });
             }
@@ -306,58 +318,121 @@ export class AprobacionCoordinadorComponent implements OnInit {
     });
   }
 
+  // ELIMINA LOS CMPLIDOS EN EL ARRAY DE APROBACION MULTIPLE
+  ClearSelectedCumplidos(): void {
+    this.CumplidosSelected = [];
+  }
+
   CumplidosSeleccionados(event): void {
     //VARIABLES
     var parametro: any;
     var cumplido: any;
 
-    if(event.isSelected){
-      this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PRS_DVE,Nombre:POR REVISAR SUPERVISOR`).subscribe({
-        next: (response: Respuesta) => {
-          if(response.Success){
-            parametro = response.Data;
-            if ((response.Data as any[]).length === 0) {
-              console.log("No se ha encontrado el parametro.");
-            }
-            this.request.get(environment.ADMINISTRATIVA_JBPM_SERVICE, `contrato_elaborado/${event.data.PagoMensual.NumeroContrato}/${event.data.PagoMensual.VigenciaContrato}`).subscribe({
-              next: (response: any) => {
-                //SE CREA EL CUMPLIDO Y SE CAMBIAN VALORES
-                cumplido = event.data.PagoMensual;
-                cumplido.Responsable = response.contrato.supervisor.documento_identificacion;
-                cumplido.CargoResponsable = "SUPERVISOR";
-                cumplido.EstadoPagoMensualId = parametro[0].Id;
-                cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
-                cumplido.FechaModificacion = new Date();
-                this.CumplidosSelected.push(cumplido);
+    if (event.isSelected === null) {
+      if (event.selected.length > 0) {
+        this.CumplidosSelected = [];
+        this.DeshabilitarBoton = true;
+        let cumplidosPromises = event.selected.map(cumplido => {
+          return new Promise((resolve, reject) => {
+            this.popUp.loading();
+            this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PRS_DVE,Nombre:POR REVISAR SUPERVISOR`).subscribe({
+              next: (response: Respuesta) => {
+                if (response.Success) {
+                  parametro = response.Data;
+                  if ((response.Data as any[]).length === 0) {
+                    this.popUp.error("No se ha encontrado el parámetro para cambio de estado.");
+                  }
+                  this.request.get(environment.ADMINISTRATIVA_JBPM_SERVICE, `contrato_elaborado/${cumplido.PagoMensual.NumeroContrato}/${cumplido.PagoMensual.VigenciaContrato}`).subscribe({
+                    next: (response) => {
+                        //SE CREA EL CUMPLIDO Y SE CAMBIAN VALORES
+                        cumplido.PagoMensual.Responsable = response.contrato.supervisor.documento_identificacion;
+                        cumplido.PagoMensual.CargoResponsable = "SUPERVISOR";
+                        cumplido.PagoMensual.EstadoPagoMensualId = parametro[0].Id;
+                        cumplido.PagoMensual.FechaCreacion = new Date(cumplido.FechaCreacion);
+                        cumplido.PagoMensual.FechaModificacion = new Date();
+                        this.CumplidosSelected.push(cumplido.PagoMensual);
+                        resolve(undefined);
+                      
+                    },
+                    error: (error) => {
+                      reject(error);
+                    }
+                  }
+                  );
+                }
+              }, error: (error) => {
+                reject(error);
               }
             });
+          });
+
+        });
+        Promise.all(cumplidosPromises)
+          .then(() => {
+            this.DeshabilitarBoton = false;
+            this.popUp.close();
+          })
+          .catch(error => {
+            this.popUp.error("Error al seleccionar cumplidos").then(() => {
+              window.location.reload();
+            });
+            this.DeshabilitarBoton = true;
+          });
+      }
+      if (event.selected.length === 0) {
+        this.ClearSelectedCumplidos();
+      }
+    }
+
+    else {
+      if (event.isSelected) {
+        this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PRS_DVE,Nombre:POR REVISAR SUPERVISOR`).subscribe({
+          next: (response: Respuesta) => {
+            if (response.Success) {
+              parametro = response.Data;
+              if ((response.Data as any[]).length === 0) {
+                this.popUp.error("No se ha encontrado el parámetro para cambio de estado.");
+              }
+              this.request.get(environment.ADMINISTRATIVA_JBPM_SERVICE, `contrato_elaborado/${event.data.PagoMensual.NumeroContrato}/${event.data.PagoMensual.VigenciaContrato}`).subscribe({
+                next: (response: any) => {
+                  //SE CREA EL CUMPLIDO Y SE CAMBIAN VALORES
+                  cumplido = event.data.PagoMensual;
+                  cumplido.Responsable = response.contrato.supervisor.documento_identificacion;
+                  cumplido.CargoResponsable = "SUPERVISOR";
+                  cumplido.EstadoPagoMensualId = parametro[0].Id;
+                  cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
+                  cumplido.FechaModificacion = new Date();
+                  this.CumplidosSelected.push(cumplido);
+                }
+              });
+            }
+          }
+        });
+      } else {
+        //ELIMINA EL CUMPLIDO
+        for (var i = 0; i < this.CumplidosSelected.length; i++) {
+          if (this.CumplidosSelected[i] != null && this.CumplidosSelected[i].Id == event.data.PagoMensual.Id) {
+            delete this.CumplidosSelected[i];
           }
         }
-      });
-    }else{
-      //ELIMINA EL CUMPLIDO
-      for(var i = 0; i < this.CumplidosSelected.length; i++){
-        if(this.CumplidosSelected[i] != null && this.CumplidosSelected[i].Id == event.data.PagoMensual.Id){
-          delete this.CumplidosSelected[i];
+        //VUELVE A ARMAR EL ARRAY SIN ESPACIOS EN BLANCO
+        var cont = 0;
+        var cumplidos_nuevo = [];
+        for (var i = 0; i < this.CumplidosSelected.length; i++) {
+          if (this.CumplidosSelected[i] != null) {
+            cumplidos_nuevo[cont] = this.CumplidosSelected[i];
+            cont++;
+          }
         }
+        this.CumplidosSelected = cumplidos_nuevo;
       }
-      //VUELVE A ARMAR EL ARRAY SIN ESPACIOS EN BLANCO
-      var cont = 0;
-      var cumplidos_nuevo = [];
-      for(var i = 0; i < this.CumplidosSelected.length; i++){
-        if(this.CumplidosSelected[i] != null){
-          cumplidos_nuevo[cont] = this.CumplidosSelected[i];
-          cont++;
-        }
-      }
-      this.CumplidosSelected = cumplidos_nuevo;
     }
   }
 
-  AprobarMultiplesCumplidos():void {
-    if(this.CumplidosSelected[0] == null){
+  AprobarMultiplesCumplidos(): void {
+    if (this.CumplidosSelected[0] == null) {
       this.popUp.warning("Por favor seleccione un cumplido para aprobar.")
-    }else{
+    } else {
       this.popUp.confirm("Aprobar Cumplidos", "¿Está seguro que desea dar el visto bueno a las solicitudes de cumplidos seleccionadas?", "send").then(result => {
         if (result.isConfirmed) {
           this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/aprobar_documentos`, this.CumplidosSelected).subscribe({
