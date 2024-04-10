@@ -18,7 +18,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
 
   //SETTINGS
   PeticionesSettings: any;
-  DeshabilitarBoton: boolean = false;
+  DeshabilitarBoton = false;
   dialogConfig: MatDialogConfig;
 
   //DATA
@@ -97,7 +97,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
   consultarNumeroDocumento(): void {
     this.popUp.loading();
     this.userService.user$.subscribe((data: any) => {
-      if (data ? data.userService ? data.userService.documento ? true : false : false : false) {
+      if (data && data.userService && data.userService.documento) {
         this.documentoCoordinador = data.userService.documento;
       }
     });
@@ -124,7 +124,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
         next: (response: Respuesta) => {
           if (response.Success) {
             this.popUp.close();
-            if (response.Data == null || (response.Data as any).length === 0) {
+            if (response.Data === null || (response.Data as any).length === 0) {
               this.popUp.warning("No se encontraron peticiones para el coordinador.");
             } else {
               this.PeticionesData = new LocalDataSource(response.Data);
@@ -149,7 +149,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
   }
 
   GenerarCertificado(): void {
-    if (this.ProyectoCurricularSeleccionado == null || this.MesSeleccionado == null || this.AnoSeleccionado == null || this.PeriodoSeleccionado == null) {
+    if (this.ProyectoCurricularSeleccionado === null || this.MesSeleccionado === null || this.AnoSeleccionado === null || this.PeriodoSeleccionado === null) {
       this.popUp.warning("Se deben de seleccionar todos los campos para generar el certificado.")
     } else {
       //VARIABLES
@@ -411,7 +411,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
       } else {
         //ELIMINA EL CUMPLIDO
         for (var i = 0; i < this.CumplidosSelected.length; i++) {
-          if (this.CumplidosSelected[i] != null && this.CumplidosSelected[i].Id == event.data.PagoMensual.Id) {
+          if (this.CumplidosSelected[i] != null && this.CumplidosSelected[i].Id === event.data.PagoMensual.Id) {
             delete this.CumplidosSelected[i];
           }
         }
@@ -430,7 +430,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
   }
 
   AprobarMultiplesCumplidos(): void {
-    if (this.CumplidosSelected[0] == null) {
+    if (this.CumplidosSelected.length === 0) {
       this.popUp.warning("Por favor seleccione un cumplido para aprobar.")
     } else {
       this.popUp.confirm("Aprobar Cumplidos", "¿Está seguro que desea dar el visto bueno a las solicitudes de cumplidos seleccionadas?", "send").then(result => {
