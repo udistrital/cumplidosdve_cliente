@@ -19,7 +19,7 @@ export class AprobacionPagoComponent implements OnInit {
   //SETTINGS
   PeticionesOrdenadorSettings: any;
   dialogConfig: MatDialogConfig;
-  DeshabilitarBoton: boolean = false;
+  DeshabilitarBoton = false;
 
 
   //DATA
@@ -95,7 +95,7 @@ export class AprobacionPagoComponent implements OnInit {
   consultarNumeroDocumento(): void {
     this.popUp.loading();
     this.userService.user$.subscribe((data: any) => {
-      if (data ? data.userService ? data.userService.documento ? true : false : false : false) {
+      if (data && data.userService && data.userService.documento) {
         this.DocumentoOrdenador = data.userService.documento;
       }
     });
@@ -120,7 +120,7 @@ export class AprobacionPagoComponent implements OnInit {
       next: (response: Respuesta) => {
         if (response.Success) {
           this.popUp.close();
-          if (response.Data == null || (response.Data as any).length === 0) {
+          if (response.Data === null || (response.Data as any).length === 0) {
             this.popUp.warning("No se encontraron peticiones para el Ordenador del Gasto.");
           } else {
             this.popUp.close();
@@ -147,7 +147,7 @@ export class AprobacionPagoComponent implements OnInit {
   }
 
   GenerarCertificado(): void {
-    if (this.MesSeleccionado == null || this.AnoSeleccionado == null || this.PeriodoSeleccionado == null) {
+    if (this.MesSeleccionado === null || this.AnoSeleccionado === null || this.PeriodoSeleccionado === null) {
       this.popUp.warning("Se deben de seleccionar todos los campos para generar el certificado.")
     } else {
       var facultad_homologada = null;
@@ -394,7 +394,7 @@ export class AprobacionPagoComponent implements OnInit {
       } else {
         //ELIMINA EL CUMPLIDO
         for (var i = 0; i < this.CumplidosSelected.length; i++) {
-          if (this.CumplidosSelected[i] != null && this.CumplidosSelected[i].Id == event.data.PagoMensual.Id) {
+          if (this.CumplidosSelected[i] != null && this.CumplidosSelected[i].Id === event.data.PagoMensual.Id) {
             delete this.CumplidosSelected[i];
           }
         }
@@ -413,7 +413,7 @@ export class AprobacionPagoComponent implements OnInit {
   }
 
   AprobarMultiplesPagos(): void {
-    if (this.CumplidosSelected[0] == null) {
+    if (this.CumplidosSelected.length === 0) {
       this.popUp.warning("Por favor seleccione un cumplido para aprobar el pago.")
     } else {
       this.popUp.confirm("Aprobar Pagos", "¿Está seguro que desea aprobar el pago para las solicitudes de cumplidos seleccionadas?", "send").then(result => {
