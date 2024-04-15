@@ -142,6 +142,8 @@ export class AprobacionPagoComponent implements OnInit {
       switch (change.action) {
         case 'page':
           this.CumplidosSelected = [];
+        case 'filter':
+          this.CumplidosSelected = [];
       }
     });
   }
