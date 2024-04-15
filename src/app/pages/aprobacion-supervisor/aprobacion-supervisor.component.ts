@@ -117,6 +117,7 @@ export class AprobacionSupervisorComponent implements OnInit {
       switch (change.action) {
         case 'page':
           this.CumplidosSelected = [];
+          this.CumplidosSelected = [];
       }
     });
   }
