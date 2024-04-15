@@ -144,6 +144,8 @@ export class AprobacionCoordinadorComponent implements OnInit {
       switch (change.action) {
         case 'page':
           this.CumplidosSelected = [];
+        case 'filter':
+          this.CumplidosSelected = [];
       }
     });
   }
