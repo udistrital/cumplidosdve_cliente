@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LocalDataSource } from 'ng2-smart-table';
 import { Respuesta } from 'src/app/@core/models/respuesta';
-import { TablaPeticionesSupervisor } from 'src/app/@core/models/tabla_peticiones_supervisor';
+import { TablaPeticiones } from 'src/app/@core/models/tabla_peticiones';
 import { environment } from 'src/environments/environment';
 import { RequestManager } from '../services/requestManager';
 import { UserService } from '../services/userService';
@@ -41,7 +41,7 @@ export class AprobacionSupervisorComponent implements OnInit {
   initTable(): void {
     this.PeticionesSupervisorSettings = {
       selectMode: 'multi',
-      columns: TablaPeticionesSupervisor,
+      columns: TablaPeticiones,
       mode: 'external',
       actions: {
         add: false,

@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { LocalDataSource } from 'ng2-smart-table';
 import { Respuesta } from 'src/app/@core/models/respuesta';
-import { TablaPeticionesOrdenador } from 'src/app/@core/models/tabla_peticiones_ordenador';
+import { TablaPeticiones } from 'src/app/@core/models/tabla_peticiones';
 import { environment } from 'src/environments/environment';
 import { RequestManager } from '../services/requestManager';
 import { UserService } from '../services/userService';
 import { UtilService } from '../services/utilService';
 import { ModalDocumentViewerComponent } from '../modal-document-viewer/modal-document-viewer.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { FixDataService } from 'src/app/@core/services/fix_data.service';
 
 @Component({
   selector: 'app-aprobacion-pago',
@@ -39,6 +40,7 @@ export class AprobacionPagoComponent implements OnInit {
     private dialog: MatDialog,
     private popUp: UtilService,
     private userService: UserService,
+    private fixDataService: FixDataService
   ) {
     this.initTable();
     this.GenerarPeriodos();
@@ -57,7 +59,7 @@ export class AprobacionPagoComponent implements OnInit {
   initTable(): void {
     this.PeticionesOrdenadorSettings = {
       selectMode: 'multi',
-      columns: TablaPeticionesOrdenador,
+      columns: TablaPeticiones,
       mode: 'external',
       actions: {
         add: false,
@@ -143,6 +145,8 @@ export class AprobacionPagoComponent implements OnInit {
         case 'page':
           this.CumplidosSelected = [];
         case 'filter':
+          this.CumplidosSelected = [];
+        case 'sort':
           this.CumplidosSelected = [];
       }
     });

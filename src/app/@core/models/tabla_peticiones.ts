@@ -1,7 +1,12 @@
+import { Injector } from '@angular/core';
+import { SmartTableService } from "../services/smart_table_service";
+
 //VARIABLES
- let Numero_Contrato ='';
- let Mes = '';
- let Ano = '';
+const injector: Injector = Injector.create({
+    providers: [{ provide: SmartTableService, useClass: SmartTableService }]
+});
+const TableService: SmartTableService = injector.get(SmartTableService);
+
 export const TablaPeticiones: any = {
     Id: {
         hide: true
@@ -12,56 +17,42 @@ export const TablaPeticiones: any = {
         editable: false,
         filter: true,
         type: 'text',
-        valuePrepareFunction: (data) => {
-            return data.Nombre;
-        },
-        filterFunction: (data?: any, search?: string) => {
-            return data.Nombre.toLowerCase().includes(search.toLowerCase());
-        }
+        ...TableService.getProyectoCurricularConf()
     },
     PagoMensual: {
         title: 'Documento',
         width: '10%',
         editable: false,
-        filter: false,
-        valuePrepareFunction: (data) => {
-            Numero_Contrato = data.NumeroContrato;
-            Mes = data.Mes;
-            Ano = data.Ano;
-            return data.Persona;
-        }
+        filter: true,
+        type: 'text',
+        ...TableService.getDocumentoConf()
     },
     NombrePersona: {
-        title: 'Nombre Docente',
+        title: 'Nombre Profesor',
         width: '20%',
         editable: false,
-        filter: false
+        filter: true,
+        ...TableService.getNombreConf()
     },
     NumeroContrato: {
-        title: 'Número Vinculación',
+        title: 'Número Contrato',
         width: '15%',
         editable: false,
-        filter: false,
-        valuePrepareFunction: () => {
-           return Numero_Contrato;
-        }
+        filter: true,
+        ...TableService.getNumeroContratoConf()
     },
     Mes: {
         title: 'Mes Solicitud',
         width: '15%',
         editable: false,
-        filter: false,
-        valuePrepareFunction: () => {
-            return Mes;
-        }
+        filter: true,
+        ...TableService.getMesSolicitudConf
     },
     Ano: {
         title: 'Año Solicitud',
         width: '15%',
         editable: false,
-        filter: false,
-        valuePrepareFunction: () => {
-            return Ano;
-        }
+        filter: true,
+        ...TableService.getAnioSolicitudConf()
     }
 }

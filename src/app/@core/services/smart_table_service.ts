@@ -1,28 +1,9 @@
-import { LocalDataSource } from 'ng2-smart-table';
-import { PagoMensual } from '../models/pago_mensual';
 import { Injectable } from '@angular/core';
 
 @Injectable({
     providedIn: 'root'
 })
 export class SmartTableService {
-
-    Data: LocalDataSource;
-    PagoMensual: PagoMensual;
-    PagoMensualArr = [];
-
-    constructor(
-    ) {
-
-    }
-    public setPagoMensualData(data: LocalDataSource) {
-        this.Data = data;
-        this.Data.getAll().then((value) => {
-            value.forEach(val => {
-                this.PagoMensualArr.push(val.Dependencia);
-            })
-        })
-    }
 
     public getProyectoCurricularConf() {
         return {
@@ -38,7 +19,7 @@ export class SmartTableService {
         };
     }
 
-    public getProyectoNombre() {
+    public getNombreConf() {
         return {
             valuePrepareFunction: (cell?: any) => {
                 return this.prepareFunctionNombre(cell)
@@ -124,20 +105,16 @@ export class SmartTableService {
     }
 
     private filterFunctionProyectoCurricular(cell?: any, search?: string): boolean {
-
         if (!search.length) {
             return false;
         }
-
         const value = this.prepareFunctionProyectoCurricular(cell);
         if (!value) {
             return false;
         }
-
         if ((value.toUpperCase()).indexOf(search.toUpperCase()) > -1) {
             return true;
         }
-
         return false;
     }
 
@@ -145,7 +122,7 @@ export class SmartTableService {
         if (!value) {
             return '';
         }
-        return value.Nombre
+        return value
     }
 
 
@@ -156,20 +133,16 @@ export class SmartTableService {
     }
 
     private filterFunctionNombre(cell?: any, search?: string): boolean {
-
         if (!search.length) {
             return false;
         }
-
         const value = this.prepareFunctionNombre(cell);
         if (!value) {
             return false;
         }
-
         if ((value.toUpperCase()).indexOf(search.toUpperCase()) > -1) {
             return true;
         }
-
         return false;
     }
 
@@ -177,7 +150,6 @@ export class SmartTableService {
         if (!value) {
             return '';
         }
-        this.PagoMensual = value
         return value.Persona
     }
 
@@ -188,25 +160,20 @@ export class SmartTableService {
     }
 
     private filterFunctionDocumento(cell?: any, search?: string): boolean {
-
         if (!search.length) {
             return false;
         }
-
         const value = this.prepareFunctionProyectoCurricular(cell);
         if (!value) {
             return false;
         }
-
         if ((value.toUpperCase()).indexOf(search.toUpperCase()) > -1) {
             return true;
         }
-
         return false;
     }
 
     private prepareFunctionNumeroContrato(value?: any) {
-        console.log(value)
         if (!value) {
             return '';
         }
@@ -220,25 +187,20 @@ export class SmartTableService {
     }
 
     private filterFunctionNumeroContrato(cell?: any, search?: string): boolean {
-
         if (!search.length) {
             return false;
         }
-
         const value = this.prepareFunctionNumeroContrato(cell);
         if (!value) {
             return false;
         }
-
         if ((value.toUpperCase()).indexOf(search.toUpperCase()) > -1) {
             return true;
         }
-
         return false;
     }
 
     private prepareFunctionMesSolicitud(value?: any) {
-        console.log(value)
         if (!value) {
             return '';
         }
@@ -252,25 +214,20 @@ export class SmartTableService {
     }
 
     private filterFunctionMesSolicitud(cell?: any, search?: string): boolean {
-
         if (!search.length) {
             return false;
         }
-
         const value = this.prepareFunctionMesSolicitud(cell);
         if (!value) {
             return false;
         }
-
         if ((value.toString().toUpperCase()).indexOf(search.toUpperCase()) > -1) {
             return true;
         }
-
         return false;
     }
 
     private prepareFunctionAnioSolicitud(value?: any) {
-        console.log(value)
         if (!value) {
             return '';
         }
@@ -284,20 +241,16 @@ export class SmartTableService {
     }
 
     private filterFunctionAnioSolicitud(cell?: any, search?: string): boolean {
-
         if (!search.length) {
             return false;
         }
-
         const value = this.prepareFunctionAnioSolicitud(cell);
         if (!value) {
             return false;
         }
-
         if ((value.toString().toUpperCase()).indexOf(search.toUpperCase()) > -1) {
             return true;
         }
-
         return false;
     }
 
@@ -310,9 +263,4 @@ export class SmartTableService {
         }
         return 0;
     }
-
-
-
-
-
 }   
