@@ -145,7 +145,6 @@ export class AprobacionPagoComponent implements OnInit {
               this.popUp.close();
             }
             resolve(undefined);
-            this.popUp.close();
           }
         },
         error: (error: any) => {
