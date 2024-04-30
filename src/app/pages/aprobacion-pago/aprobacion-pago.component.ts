@@ -142,6 +142,7 @@ export class AprobacionPagoComponent implements OnInit {
               let fixedData = this.fixDataService.getDatos();
               this.PeticionesOrdenadorData = new LocalDataSource(fixedData);
               this.SuscribeEventosData();
+              this.popUp.close();
             }
             resolve(undefined);
             this.popUp.close();

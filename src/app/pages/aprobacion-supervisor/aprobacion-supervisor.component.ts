@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { RequestManager } from '../services/requestManager';
 import { UserService } from '../services/userService';
 import { UtilService } from '../services/utilService';
+import { FixDataService } from 'src/app/@core/services/fix_data.service';
 
 @Component({
   selector: 'app-aprobacion-supervisor',
@@ -28,14 +29,17 @@ export class AprobacionSupervisorComponent implements OnInit {
     private request: RequestManager,
     private popUp: UtilService,
     private userService: UserService,
+    private fixDataService: FixDataService
+
   ) {
     this.initTable();
   }
 
-  ngOnInit(): void {
-    this.consultarNumeroDocumento();
-    this.consultarSupervisor();
-    this.consultarPeticiones();
+  async ngOnInit(): Promise<void> {
+    this.popUp.loading();
+    await this.consultarNumeroDocumento();
+    await this.consultarSupervisor();
+    await this.consultarPeticiones();
   }
 
   initTable(): void {
@@ -69,45 +73,65 @@ export class AprobacionSupervisorComponent implements OnInit {
     };
   }
 
-  consultarNumeroDocumento(): void {
-    this.popUp.loading();
-    this.userService.user$.subscribe((data: any) => {
-      if (data && data.userService && data.userService.documento) {
-        this.DocumentoSupervisor = data.userService.documento;
-      }
-    });
-  }
-
-  consultarSupervisor(): void {
-    this.popUp.loading();
-    this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `supervisor_contrato?query=Documento:${this.DocumentoSupervisor}&limit=0`).subscribe({
-      next: (response: any) => {
-        this.popUp.close();
-        this.NombreSupervisor = response[0].Nombre;
-      }, error: () => {
-        this.popUp.close();
-        this.popUp.error('No se ha podido consultar al coordinador.');
-      }
-    });
-  }
-
-  consultarPeticiones(): void {
-    this.popUp.loading();
-    this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/solicitudes_supervisor/${this.DocumentoSupervisor}`).subscribe({
-      next: (response: Respuesta) => {
-        if (response.Success) {
-          this.popUp.close();
-          if (response.Data == null || (response.Data as any).length === 0) {
-            this.popUp.warning("No se han encontrado peticiones para el supervisor.");
-          } else {
-            this.PeticionesSupervisorData = new LocalDataSource(response.Data)
-            this.SuscribeEventosData();
-          }
+  async consultarNumeroDocumento() {
+    return new Promise((resolve) => {
+      this.userService.user$.subscribe((data: any) => {
+        if (data && data.userService && data.userService.documento) {
+          this.DocumentoSupervisor = data.userService.documento;
+          resolve(undefined);
         }
-      }, error: () => {
-        this.popUp.close();
-        this.popUp.error("No existen peticiones asociadas al supervisor.");
-      }
+        else {
+          this.popUp.error('No se ha podido consultar documento del supervisor.')
+        }
+      });
+    });
+  }
+
+  async consultarSupervisor() {
+    return new Promise((resolve, reject) => {
+      this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `supervisor_contrato?query=Documento:${this.DocumentoSupervisor}&limit=0`).subscribe({
+
+        next: (response: any) => {
+          if (response && response.length > 0) {
+            this.NombreSupervisor = response[0].Nombre;
+            resolve(undefined);
+          }
+          else {
+            this.popUp.error('No se ha podido consultar al supervisor.')
+          }
+        },
+        error: () => {
+          reject(
+            this.popUp.error('Error en peticion al consultar al supervisor.')
+          )
+        }
+      });
+    });
+  }
+
+  async consultarPeticiones() {
+    return new Promise((resolve, reject) => {
+      this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/solicitudes_supervisor/${this.DocumentoSupervisor}`).subscribe({
+        next: (response: Respuesta) => {
+          if (response.Success) {
+            if (response.Data === null || (response.Data as any).length === 0) {
+              this.popUp.warning("No se encontraron peticiones para el Supervisor.");
+            } else {
+              this.fixDataService.setDatos(response.Data);
+              let fixedData = this.fixDataService.getDatos();
+              this.PeticionesSupervisorData = new LocalDataSource(fixedData);
+              this.SuscribeEventosData();
+              this.popUp.close();
+            }
+            resolve(undefined);
+          }
+        },
+        error: (error: any) => {
+          reject(
+            this.popUp.error("Error obteniendo peticiones del supervisor.")
+          )
+        }
+      });
     });
   }
 
@@ -118,6 +142,8 @@ export class AprobacionSupervisorComponent implements OnInit {
         case 'page':
           this.CumplidosSelected = [];
         case 'fliter':
+          this.CumplidosSelected = [];
+        case 'sort':
           this.CumplidosSelected = [];
       }
     });
@@ -139,6 +165,7 @@ export class AprobacionSupervisorComponent implements OnInit {
   Aprobar(event): void {
     this.popUp.confirm("Aprobar", "¿Está seguro que desea dar el visto bueno a la solicitud de cumplido?", "aprobar").then(result => {
       if (result.isConfirmed) {
+        this.popUp.loading();
         //VARIABLES
         var cumplido: any;
         var parametro: any;
@@ -400,6 +427,7 @@ export class AprobacionSupervisorComponent implements OnInit {
     } else {
       this.popUp.confirm("Aprobar Cumplidos", "¿Está seguro que desea dar el visto bueno a las solicitudes de cumplidos seleccionadas?", "send").then(result => {
         if (result.isConfirmed) {
+          this.popUp.loading();
           this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/aprobar_documentos`, this.CumplidosSelected).subscribe({
             next: (response: Respuesta) => {
               if (response.Success) {

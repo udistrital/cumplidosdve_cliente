@@ -127,7 +127,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
           },
           error: () => {
             reject(
-              this.popUp.error('No se ha podido consultar al coordinador.')
+              this.popUp.error('Error en peticion al consultar al coordinador.')
             )
         }
         });
@@ -146,7 +146,8 @@ export class AprobacionCoordinadorComponent implements OnInit {
                 this.fixDataService.setDatos(response.Data);
                 let fixedData = this.fixDataService.getDatos();
                 this.PeticionesData = new LocalDataSource(fixedData);
-              this.SuscribeEventosData();
+                this.SuscribeEventosData();
+                this.popUp.close();
               }
               resolve(undefined);
               this.popUp.close();
