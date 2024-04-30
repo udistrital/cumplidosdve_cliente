@@ -233,6 +233,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
   Aprobar(event): void {
     this.popUp.confirm("Aprobar", "¿Está seguro que desea dar el visto bueno a la solicitud de cumplido?", "aprobar").then(result => {
       if (result.isConfirmed) {
+        this.popUp.loading();
         //VARIABLES
         var cumplido: any;
         var parametro: any;
@@ -462,6 +463,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
     } else {
       this.popUp.confirm("Aprobar Cumplidos", "¿Está seguro que desea dar el visto bueno a las solicitudes de cumplidos seleccionadas?", "send").then(result => {
         if (result.isConfirmed) {
+          this.popUp.loading();
           this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/aprobar_documentos`, this.CumplidosSelected).subscribe({
             next: (response: Respuesta) => {
               if (response.Success) {
