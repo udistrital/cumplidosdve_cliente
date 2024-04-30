@@ -8,6 +8,7 @@ import { ModalDocumentViewerComponent } from '../modal-document-viewer/modal-doc
 import { RequestManager } from '../services/requestManager';
 import { UserService } from '../services/userService';
 import { UtilService } from '../services/utilService';
+import { FixDataService } from 'src/app/@core/services/fix_data.service';
 
 @Component({
   selector: 'app-aprobacion-coordinador',
@@ -41,15 +42,17 @@ export class AprobacionCoordinadorComponent implements OnInit {
     private dialog: MatDialog,
     private popUp: UtilService,
     private userService: UserService,
+    private fixDataService: FixDataService
   ) {
     this.initTable();
     this.GenerarPeriodos();
   }
 
-  ngOnInit(): void {
-    this.consultarNumeroDocumento();
-    this.consultarCoordinador();
-    this.consultarPeticiones();
+  async ngOnInit(): Promise<void> {
+    this.popUp.loading();
+    await this.consultarNumeroDocumento();
+    await this.consultarCoordinador();
+    await this.consultarPeticiones()
     this.dialogConfig = new MatDialogConfig();
     this.dialogConfig.width = '1200px';
     this.dialogConfig.height = '800px';
@@ -94,47 +97,67 @@ export class AprobacionCoordinadorComponent implements OnInit {
     this.Periodos[AnoProximo] = [AnoProximo + "-3", AnoProximo + "-1"]
   }
 
-  consultarNumeroDocumento(): void {
-    this.popUp.loading();
+  async consultarNumeroDocumento() {
+    return new Promise((resolve) => {
     this.userService.user$.subscribe((data: any) => {
       if (data && data.userService && data.userService.documento) {
         this.documentoCoordinador = data.userService.documento;
+          resolve(undefined);
+        }
+        else {
+          this.popUp.error('No se ha podido consultar documento del coordinador.')
       }
+      });
     });
   }
 
-  consultarCoordinador(): void {
-    this.popUp.loading();
+  async consultarCoordinador() {
+    return new Promise((resolve, reject) => {
     this.request.get(
       environment.ACADEMICA_JBPM_SERVICE, `coordinador_carrera_snies/${this.documentoCoordinador}`).subscribe({
         next: (response: any) => {
-          this.popUp.close();
+            if (response && response.coordinadorCollection.coordinador !== undefined) {
           this.NombreCoordinador = response.coordinadorCollection.coordinador[0].nombre_coordinador;
           this.Proyectos_Curriculares = response.coordinadorCollection.coordinador;
-        }, error: () => {
-          this.popUp.error('No se ha podido consultar al coordinador.');
+              resolve(undefined);
+            }
+            else {
+              this.popUp.error('No se ha podido consultar al coordinador.')
+            }
+          },
+          error: () => {
+            reject(
+              this.popUp.error('No se ha podido consultar al coordinador.')
+            )
         }
-      });
+        });
+    });
   }
 
-  consultarPeticiones(): void {
-    this.popUp.loading();
+  async consultarPeticiones() {
+    return new Promise((resolve, reject) => {
     this.request.get(
       environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/solicitudes_coordinador/${this.documentoCoordinador}`).subscribe({
         next: (response: Respuesta) => {
           if (response.Success) {
-            this.popUp.close();
             if (response.Data === null || (response.Data as any).length === 0) {
               this.popUp.warning("No se encontraron peticiones para el coordinador.");
             } else {
-              this.PeticionesData = new LocalDataSource(response.Data);
+                this.fixDataService.setDatos(response.Data);
+                let fixedData = this.fixDataService.getDatos();
+                this.PeticionesData = new LocalDataSource(fixedData);
               this.SuscribeEventosData();
+              }
+              resolve(undefined);
+              this.popUp.close();
             }
+          },
+          error: (error: any) => {
+            reject(
+              this.popUp.error("Error obteniendo peticiones del coordinador.")
+            )
           }
-        }, error: () => {
-          this.popUp.close();
-          this.popUp.error("No existen peticiones asociadas al coordinador.");
-        }
+        });
       });
   }
 
@@ -145,6 +168,8 @@ export class AprobacionCoordinadorComponent implements OnInit {
         case 'page':
           this.CumplidosSelected = [];
         case 'filter':
+          this.CumplidosSelected = [];
+        case 'sort':
           this.CumplidosSelected = [];
       }
     });
