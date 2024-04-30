@@ -46,10 +46,11 @@ export class AprobacionPagoComponent implements OnInit {
     this.GenerarPeriodos();
   }
 
-  ngOnInit(): void {
-    this.consultarNumeroDocumento();
-    this.consultarOrdenador();
-    this.consultarPeticiones();
+  async ngOnInit(): Promise<void> {
+    this.popUp.loading();
+    await this.consultarNumeroDocumento();
+    await this.consultarOrdenador();
+    await this.consultarPeticiones();
     this.dialogConfig = new MatDialogConfig();
     this.dialogConfig.width = '1200px';
     this.dialogConfig.height = '800px';
@@ -94,47 +95,64 @@ export class AprobacionPagoComponent implements OnInit {
     this.Periodos[AnoProximo] = [AnoProximo + "-3", AnoProximo + "-1"]
   }
 
-  consultarNumeroDocumento(): void {
-    this.popUp.loading();
-    this.userService.user$.subscribe((data: any) => {
-      if (data && data.userService && data.userService.documento) {
-        this.DocumentoOrdenador = data.userService.documento;
-      }
-    });
-  }
-
-  consultarOrdenador(): void {
-    this.popUp.loading();
-    this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `ordenadores?query=Documento:${this.DocumentoOrdenador}&limit=0`).subscribe({
-      next: (response: any) => {
-        this.popUp.close();
-        this.NombreOrdenador = response[0].NombreOrdenador;
-      }, error: () => {
-        this.popUp.close();
-        this.popUp.error('No se ha podido consultar el Ordenador del gasto.')
-      }
-    });
-  }
-
-  consultarPeticiones(): void {
-    this.popUp.loading();
-    this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/solicitudes_ordenador/${this.DocumentoOrdenador}`).subscribe({
-      next: (response: Respuesta) => {
-        if (response.Success) {
-          this.popUp.close();
-          if (response.Data === null || (response.Data as any).length === 0) {
-            this.popUp.warning("No se encontraron peticiones para el Ordenador del Gasto.");
-          } else {
-            this.popUp.close();
-            this.PeticionesOrdenadorData = new LocalDataSource(response.Data);
-            this.SuscribeEventosData();
-
-          }
+  async consultarNumeroDocumento() {
+    return new Promise((resolve) => {
+      this.userService.user$.subscribe((data: any) => {
+        if (data && data.userService && data.userService.documento) {
+          this.DocumentoOrdenador = data.userService.documento;
+          resolve(undefined);
         }
-      }, error: () => {
-        this.popUp.close();
-        this.popUp.error("No existen peticiones asociadas al Ordenador.");
-      }
+        else {
+          this.popUp.error('No se ha podido consultar documento del Ordenador del gasto.')
+        }
+      });
+    });
+  }
+
+  async consultarOrdenador() {
+    return new Promise((resolve, reject) => {
+      this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `ordenadores?query=Documento:${this.DocumentoOrdenador}&limit=0`).subscribe({
+        next: (response: any) => {
+          if (response && response.length > 0) {
+            this.NombreOrdenador = response[0].NombreOrdenador;
+            resolve(undefined);
+          }
+          else{
+            this.popUp.error('No se ha podido obtener el Ordenador del gasto')
+          }
+        },
+        error: () => {
+          reject(
+            this.popUp.error('Error en peticion al consultar Ordenador del gasto')
+          )
+        }
+      });
+    });
+  }
+
+  async consultarPeticiones() {
+    return new Promise((resolve, reject) => {
+      this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/solicitudes_ordenador/${this.DocumentoOrdenador}`).subscribe({
+        next: (response: Respuesta) => {
+          if (response.Success) {
+            if (response.Data === null || (response.Data as any).length === 0) {
+              this.popUp.warning("No se encontraron peticiones para el Ordenador del Gasto.");
+            } else {
+              this.fixDataService.setDatos(response.Data);
+              let fixedData = this.fixDataService.getDatos();
+              this.PeticionesOrdenadorData = new LocalDataSource(fixedData);
+              this.SuscribeEventosData();
+            }
+            resolve(undefined);
+            this.popUp.close();
+          }
+        },
+        error: (error: any) => {
+          reject(
+            this.popUp.error("Error obteniendo peticiones del Ordenador del gasto")
+          )
+        }
+      });
     });
   }
 
@@ -207,7 +225,9 @@ export class AprobacionPagoComponent implements OnInit {
   Aprobar(event): void {
     this.popUp.confirm("Aprobar", "¿Está seguro que desea aprobar el pago?", "aprobar").then(result => {
       if (result.isConfirmed) {
-        //VARIABLES
+        this.popUp.loading();
+
+        // VARIABLES
         var cumplido: any;
         var parametro: any;
 
@@ -424,6 +444,7 @@ export class AprobacionPagoComponent implements OnInit {
     } else {
       this.popUp.confirm("Aprobar Pagos", "¿Está seguro que desea aprobar el pago para las solicitudes de cumplidos seleccionadas?", "send").then(result => {
         if (result.isConfirmed) {
+          this.popUp.loading();
           this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/aprobar_pagos`, this.CumplidosSelected).subscribe({
             next: (response: Respuesta) => {
               if (response.Success) {
