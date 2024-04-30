@@ -402,6 +402,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
           })
           .catch(error => {
             this.popUp.error("Error al seleccionar cumplidos").then(() => {
+              this.ClearSelectedCumplidos();
               window.location.reload();
             });
             this.DeshabilitarBoton = true;
@@ -432,6 +433,12 @@ export class AprobacionCoordinadorComponent implements OnInit {
                   cumplido.FechaModificacion = new Date();
                   this.CumplidosSelected.push(cumplido);
                 }
+              });
+            }
+            else {
+              this.popUp.error("Error al seleccionar cumplido").then(() => {
+                this.ClearSelectedCumplidos();
+                window.location.reload();
               });
             }
           }

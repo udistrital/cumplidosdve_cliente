@@ -349,6 +349,7 @@ export class AprobacionSupervisorComponent implements OnInit {
           })
           .catch(error => {
             this.popUp.error("Error al seleccionar cumplidos").then(() => {
+              this.ClearSelectedCumplidos();
               window.location.reload();
             });
             this.DeshabilitarBoton = true;
@@ -392,6 +393,7 @@ export class AprobacionSupervisorComponent implements OnInit {
               });
             } else {
               this.popUp.error("Error al seleccionar cumplido").then(() => {
+                this.ClearSelectedCumplidos();
                 window.location.reload();
               });
             }

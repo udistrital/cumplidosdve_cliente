@@ -388,6 +388,7 @@ export class AprobacionPagoComponent implements OnInit {
           })
           .catch(error => {
             this.popUp.error("Error al seleccionar cumplidos").then(() => {
+              this.ClearSelectedCumplidos();
               window.location.reload();
             });
             this.DeshabilitarBoton = true;
@@ -414,6 +415,12 @@ export class AprobacionPagoComponent implements OnInit {
               cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
               cumplido.FechaModificacion = new Date();
               this.CumplidosSelected.push(cumplido);
+            }
+            else {
+              this.popUp.error("Error al seleccionar cumplido").then(() => {
+                this.ClearSelectedCumplidos();
+                window.location.reload();
+              });
             }
           }
         });
