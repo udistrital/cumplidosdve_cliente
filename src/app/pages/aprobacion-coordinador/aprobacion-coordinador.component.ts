@@ -152,7 +152,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
               resolve(undefined);
             }
           },
-          error: (error: any) => {
+          error: () => {
             reject(
               this.popUp.error("Error obteniendo peticiones del coordinador.")
             )
@@ -363,6 +363,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
         let cumplidosPromises = event.selected.map(cumplido => {
           return new Promise((resolve, reject) => {
             this.popUp.loading();
+            //SE CONSULTA EL PARAMETRO
             this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PRS_DVE,Nombre:POR REVISAR SUPERVISOR`).subscribe({
               next: (response: Respuesta) => {
                 if (response.Success) {
@@ -370,26 +371,32 @@ export class AprobacionCoordinadorComponent implements OnInit {
                   if ((response.Data as any[]).length === 0) {
                     this.popUp.error("No se ha encontrado el parámetro para cambio de estado.");
                   }
+                  //SE CONSULTA EL SUPERVISOR
                   this.request.get(environment.ADMINISTRATIVA_JBPM_SERVICE, `contrato_elaborado/${cumplido.PagoMensual.NumeroContrato}/${cumplido.PagoMensual.VigenciaContrato}`).subscribe({
                     next: (response) => {
-                        //SE CREA EL CUMPLIDO Y SE CAMBIAN VALORES
-                        cumplido.PagoMensual.Responsable = response.contrato.supervisor.documento_identificacion;
-                        cumplido.PagoMensual.CargoResponsable = "SUPERVISOR";
-                        cumplido.PagoMensual.EstadoPagoMensualId = parametro[0].Id;
-                        cumplido.PagoMensual.FechaCreacion = new Date(cumplido.FechaCreacion);
-                        cumplido.PagoMensual.FechaModificacion = new Date();
-                        this.CumplidosSelected.push(cumplido.PagoMensual);
-                        resolve(undefined);
-                      
-                    },
-                    error: (error) => {
-                      reject(error);
+                      //SE CREA EL CUMPLIDO Y SE CAMBIAN VALORES
+                      cumplido.PagoMensual.Responsable = response.contrato.supervisor.documento_identificacion;
+                      cumplido.PagoMensual.CargoResponsable = "SUPERVISOR";
+                      cumplido.PagoMensual.EstadoPagoMensualId = parametro[0].Id;
+                      cumplido.PagoMensual.FechaCreacion = new Date(cumplido.FechaCreacion);
+                      cumplido.PagoMensual.FechaModificacion = new Date();
+                      this.CumplidosSelected.push(cumplido.PagoMensual);
+                      resolve(undefined);
+                    }, error: () => {
+                      this.popUp.error(`No se ha podido consultar el supervisor, contrato: ${cumplido.PagoMensual.NumeroContrato}; docente: ${cumplido.PagoMensual.Persona}, ${cumplido.NombrePersona}`).then(() => {
+                        this.ClearSelectedCumplidos();
+                        window.location.reload();
+                      })
                     }
                   }
                   );
                 }
-              }, error: (error) => {
-                reject(error);
+              },
+              error: () => {
+                this.popUp.error("Error obteniendo parametro").then(() => {
+                  this.ClearSelectedCumplidos();
+                  window.location.reload();
+                });
               }
             });
           });
@@ -400,7 +407,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
             this.DeshabilitarBoton = false;
             this.popUp.close();
           })
-          .catch(error => {
+          .catch(() => {
             this.popUp.error("Error al seleccionar cumplidos").then(() => {
               this.ClearSelectedCumplidos();
               window.location.reload();
@@ -415,6 +422,7 @@ export class AprobacionCoordinadorComponent implements OnInit {
 
     else {
       if (event.isSelected) {
+        this.popUp.loading();
         this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PRS_DVE,Nombre:POR REVISAR SUPERVISOR`).subscribe({
           next: (response: Respuesta) => {
             if (response.Success) {
@@ -422,25 +430,32 @@ export class AprobacionCoordinadorComponent implements OnInit {
               if ((response.Data as any[]).length === 0) {
                 this.popUp.error("No se ha encontrado el parámetro para cambio de estado.");
               }
+              //SE CONSULTA SUPERVISOR
               this.request.get(environment.ADMINISTRATIVA_JBPM_SERVICE, `contrato_elaborado/${event.data.PagoMensual.NumeroContrato}/${event.data.PagoMensual.VigenciaContrato}`).subscribe({
                 next: (response: any) => {
                   //SE CREA EL CUMPLIDO Y SE CAMBIAN VALORES
-                  cumplido = event.data.PagoMensual;
-                  cumplido.Responsable = response.contrato.supervisor.documento_identificacion;
-                  cumplido.CargoResponsable = "SUPERVISOR";
-                  cumplido.EstadoPagoMensualId = parametro[0].Id;
-                  cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
-                  cumplido.FechaModificacion = new Date();
-                  this.CumplidosSelected.push(cumplido);
+                  cumplido = event.data;
+                  cumplido.PagoMensual.Responsable = response.contrato.supervisor.documento_identificacion;
+                  cumplido.PagoMensual.CargoResponsable = "SUPERVISOR";
+                  cumplido.PagoMensual.EstadoPagoMensualId = parametro[0].Id;
+                  cumplido.PagoMensual.FechaCreacion = new Date(cumplido.FechaCreacion);
+                  cumplido.PagoMensual.FechaModificacion = new Date();
+                  this.CumplidosSelected.push(cumplido.PagoMensual);
+                  this.popUp.close();
+                },
+                error: () => {
+                  this.popUp.error(`No se ha podido consultar el supervisor, contrato: ${cumplido.PagoMensual.NumeroContrato}; docente: ${cumplido.PagoMensual.Persona}, ${cumplido.NombrePersona}`).then(() => {
+                    this.ClearSelectedCumplidos();
+                    window.location.reload();
+                  })
                 }
               });
             }
-            else {
-              this.popUp.error("Error al seleccionar cumplido").then(() => {
-                this.ClearSelectedCumplidos();
-                window.location.reload();
-              });
-            }
+          }, error: () => {
+            this.popUp.error("Error al obtener parametro").then(() => {
+              this.ClearSelectedCumplidos();
+              window.location.reload();
+            });
           }
         });
       } else {
@@ -481,7 +496,9 @@ export class AprobacionCoordinadorComponent implements OnInit {
                 });
               }
             }, error: () => {
-              this.popUp.error("No se ha podido aprobar los cumplidos seleccionados.");
+              this.popUp.error("No se ha podido aprobar los cumplidos seleccionados.").then(() => {
+                window.location.reload();
+              });
             }
           });
         }

@@ -329,14 +329,17 @@ export class AprobacionSupervisorComponent implements OnInit {
                         resolve(undefined);
                       }
                     },
-                    error: (error) => {
-                      reject(error);
+                    error: () => {
+                      this.popUp.error(`No se ha podido consultar el ordenador del gasto, contrato: ${cumplido.PagoMensual.NumeroContrato}; docente: ${cumplido.PagoMensual.Persona}, ${cumplido.NombrePersona}`).then(() => {
+                        this.ClearSelectedCumplidos();
+                        window.location.reload();
+                      })
                     }
                   });
                 }
               },
-              error: (error) => {
-                reject(error);
+              error: () => {
+                this.popUp.error("Error obteniendo parametro");
               }
             });
           });
@@ -347,7 +350,7 @@ export class AprobacionSupervisorComponent implements OnInit {
             this.DeshabilitarBoton = false;
             this.popUp.close();
           })
-          .catch(error => {
+          .catch(() => {
             this.popUp.error("Error al seleccionar cumplidos").then(() => {
               this.ClearSelectedCumplidos();
               window.location.reload();
@@ -362,8 +365,9 @@ export class AprobacionSupervisorComponent implements OnInit {
     }
     else {
       if (event.isSelected) {
+        this.popUp.loading();
         //GUARDA EL CUMPLIDO
-        cumplido = event.data.PagoMensual;
+        cumplido = event.data;
 
         //CONSULTA EL PARAMETRO
         this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PAD_DVE,Nombre:POR APROBAR DECANO(A)`).subscribe({
@@ -375,28 +379,35 @@ export class AprobacionSupervisorComponent implements OnInit {
               }
 
               //CONSULTA AL ORDENADOR DEL GASTO
-              this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
+              this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.PagoMensual.NumeroContrato}/${cumplido.PagoMensual.VigenciaContrato}`).subscribe({
                 next: (response: Respuesta) => {
                   if (response.Success) {
                     ordenador = String(response.Data.NumeroDocumento)
                     // ordenador = '52310001';
 
                     //CAMBIA EL ESTADO Y AJUSTA VALORES
-                    cumplido.Responsable = ordenador;
-                    cumplido.CargoResponsable = "ORDENADOR DEL GASTO";
-                    cumplido.EstadoPagoMensualId = parametro[0].Id;
-                    cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
-                    cumplido.FechaModificacion = new Date();
-                    this.CumplidosSelected.push(cumplido);
+                    cumplido.PagoMensual.Responsable = ordenador;
+                    cumplido.PagoMensual.CargoResponsable = "ORDENADOR DEL GASTO";
+                    cumplido.PagoMensual.EstadoPagoMensualId = parametro[0].Id;
+                    cumplido.PagoMensual.FechaCreacion = new Date(cumplido.FechaCreacion);
+                    cumplido.PagoMensual.FechaModificacion = new Date();
+                    this.CumplidosSelected.push(cumplido.PagoMensual);
+                    this.popUp.close();
                   }
+                }, error: () => {
+                  this.popUp.error(`No se ha podido consultar el ordenador del gasto, contrato: ${cumplido.PagoMensual.NumeroContrato}; docente: ${cumplido.PagoMensual.Persona}, ${cumplido.NombrePersona}`).then(() => {
+                    this.ClearSelectedCumplidos();
+                    window.location.reload();
+                  });
                 }
               });
-            } else {
-              this.popUp.error("Error al seleccionar cumplido").then(() => {
-                this.ClearSelectedCumplidos();
-                window.location.reload();
-              });
             }
+          },
+          error: () => {
+            this.popUp.error("Error obteniendo parametro").then(() => {
+              this.ClearSelectedCumplidos();
+              window.location.reload();
+            });
           }
         });
       } else {
@@ -440,7 +451,9 @@ export class AprobacionSupervisorComponent implements OnInit {
                 });
               }
             }, error: () => {
-              this.popUp.error("No se ha podido aprobar los cumplidos seleccionados.");
+              this.popUp.error("No se ha podido aprobar los cumplidos seleccionados.").then(() => {
+                window.location.reload();
+              });
             }
           });
         }

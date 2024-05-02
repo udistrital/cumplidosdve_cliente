@@ -401,6 +401,7 @@ export class AprobacionPagoComponent implements OnInit {
     }
     else {
       if (event.isSelected) {
+        this.popUp.loading();
         //CONSULTA EL PARAMETRO
         this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:AP_DVE,Nombre:APROBACIÓN PAGO`).subscribe({
           next: (response: Respuesta) => {
@@ -415,13 +416,13 @@ export class AprobacionPagoComponent implements OnInit {
               cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
               cumplido.FechaModificacion = new Date();
               this.CumplidosSelected.push(cumplido);
+              this.popUp.close();
             }
-            else {
-              this.popUp.error("Error al seleccionar cumplido").then(() => {
-                this.ClearSelectedCumplidos();
-                window.location.reload();
-              });
-            }
+          }, error: () => {
+            this.popUp.error("Error obteniendo parametro").then(() => {
+              this.ClearSelectedCumplidos();
+              window.location.reload();
+            });
           }
         });
       } else {
@@ -462,7 +463,12 @@ export class AprobacionPagoComponent implements OnInit {
                 });
               }
             }, error: () => {
-              this.popUp.error("No se ha podido aprobar los pagos de los cumplidos seleccionados.")
+              const cumplidosSeleccionadosInfo = this.CumplidosSelected.map(cumplido => `${cumplido.Persona}: ${cumplido.NumeroContrato}`).join('; ');
+              this.popUp.error(`No se ha podido aprobar los pagos de los cumplidos seleccionados: ${cumplidosSeleccionadosInfo}`).then(() => {
+                this.CumplidosSelected = [];
+                window.location.reload();
+              }
+              )
             }
           });
         }
