@@ -163,11 +163,11 @@ export class SmartTableService {
         if (!search.length) {
             return false;
         }
-        const value = this.prepareFunctionProyectoCurricular(cell);
+        const value = this.prepareFunctionDocumento(cell);
         if (!value) {
             return false;
         }
-        if ((value.toUpperCase()).indexOf(search.toUpperCase()) > -1) {
+        if ((value).indexOf(search) > -1) {
             return true;
         }
         return false;
