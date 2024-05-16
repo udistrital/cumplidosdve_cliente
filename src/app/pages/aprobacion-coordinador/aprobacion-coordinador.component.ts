@@ -9,6 +9,7 @@ import { RequestManager } from '../services/requestManager';
 import { UserService } from '../services/userService';
 import { UtilService } from '../services/utilService';
 import { FixDataService } from 'src/app/@core/services/fix_data.service';
+import { SmartTableService } from 'src/app/@core/services/smart_table_service';
 
 @Component({
   selector: 'app-aprobacion-coordinador',
@@ -42,7 +43,8 @@ export class AprobacionCoordinadorComponent implements OnInit {
     private dialog: MatDialog,
     private popUp: UtilService,
     private userService: UserService,
-    private fixDataService: FixDataService
+    private fixDataService: FixDataService,
+    private smartTableService: SmartTableService
   ) {
     this.initTable();
     this.GenerarPeriodos();
@@ -60,6 +62,43 @@ export class AprobacionCoordinadorComponent implements OnInit {
   }
 
   initTable(): void {
+
+    TablaPeticiones['Dependencia'] =
+    {
+      ...TablaPeticiones['Dependencia'],
+      ...this.smartTableService.getProyectoCurricularConf()
+    }
+
+    TablaPeticiones['PagoMensual'] =
+    {
+      ...TablaPeticiones['PagoMensual'],
+      ...this.smartTableService.getDocumentoConf()
+    }
+
+    TablaPeticiones['NombrePersona'] =
+    {
+      ...TablaPeticiones['NombrePersona'],
+      ...this.smartTableService.getNombreConf()
+    }
+
+    TablaPeticiones['NumeroContrato'] =
+    {
+      ...TablaPeticiones['NumeroContrato'],
+      ...this.smartTableService.getNumeroContratoConf()
+    }
+
+    TablaPeticiones['Mes'] =
+    {
+      ...TablaPeticiones['Mes'],
+      ...this.smartTableService.getMesSolicitudConf()
+    }
+
+    TablaPeticiones['Ano'] =
+    {
+      ...TablaPeticiones['Ano'],
+      ...this.smartTableService.getAnioSolicitudConf()
+    }
+
     this.PeticionesSettings = {
       selectMode: 'multi',
       columns: TablaPeticiones,

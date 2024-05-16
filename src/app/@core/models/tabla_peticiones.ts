@@ -1,12 +1,3 @@
-import { Injector } from '@angular/core';
-import { SmartTableService } from "../services/smart_table_service";
-
-//VARIABLES
-const injector: Injector = Injector.create({
-    providers: [{ provide: SmartTableService, useClass: SmartTableService }]
-});
-const TableService: SmartTableService = injector.get(SmartTableService);
-
 export const TablaPeticiones: any = {
     Id: {
         hide: true
@@ -16,43 +7,37 @@ export const TablaPeticiones: any = {
         width: '15%',
         editable: false,
         filter: true,
-        type: 'text',
-        ...TableService.getProyectoCurricularConf()
+        type: 'text'
     },
     PagoMensual: {
         title: 'Documento',
         width: '10%',
         editable: false,
         filter: true,
-        type: 'text',
-        ...TableService.getDocumentoConf()
+        type: 'text'
     },
     NombrePersona: {
         title: 'Nombre Profesor',
         width: '20%',
         editable: false,
-        filter: true,
-        ...TableService.getNombreConf()
+        filter: true
     },
     NumeroContrato: {
         title: 'Número Contrato',
         width: '15%',
         editable: false,
-        filter: true,
-        ...TableService.getNumeroContratoConf()
+        filter: true
     },
     Mes: {
         title: 'Mes Solicitud',
         width: '15%',
         editable: false,
-        filter: true,
-        ...TableService.getMesSolicitudConf
+        filter: true
     },
     Ano: {
         title: 'Año Solicitud',
         width: '15%',
         editable: false,
-        filter: true,
-        ...TableService.getAnioSolicitudConf()
+        filter: true
     }
 }
