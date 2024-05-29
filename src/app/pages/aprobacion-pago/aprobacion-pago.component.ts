@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { LocalDataSource } from 'ng2-smart-table';
 import { Respuesta } from 'src/app/@core/models/respuesta';
-import { TablaPeticionesOrdenador } from 'src/app/@core/models/tabla_peticiones_ordenador';
+import { TablaPeticiones } from 'src/app/@core/models/tabla_peticiones';
 import { environment } from 'src/environments/environment';
 import { RequestManager } from '../services/requestManager';
 import { UserService } from '../services/userService';
 import { UtilService } from '../services/utilService';
 import { ModalDocumentViewerComponent } from '../modal-document-viewer/modal-document-viewer.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { FixDataService } from 'src/app/@core/services/fix_data.service';
+import { SmartTableService } from 'src/app/@core/services/smart_table_service';
 
 @Component({
   selector: 'app-aprobacion-pago',
@@ -39,15 +41,18 @@ export class AprobacionPagoComponent implements OnInit {
     private dialog: MatDialog,
     private popUp: UtilService,
     private userService: UserService,
+    private fixDataService: FixDataService,
+    private smartTableService: SmartTableService
   ) {
     this.initTable();
     this.GenerarPeriodos();
   }
 
-  ngOnInit(): void {
-    this.consultarNumeroDocumento();
-    this.consultarOrdenador();
-    this.consultarPeticiones();
+  async ngOnInit(): Promise<void> {
+    this.popUp.loading();
+    await this.consultarNumeroDocumento();
+    await this.consultarOrdenador();
+    await this.consultarPeticiones();
     this.dialogConfig = new MatDialogConfig();
     this.dialogConfig.width = '1200px';
     this.dialogConfig.height = '800px';
@@ -55,9 +60,46 @@ export class AprobacionPagoComponent implements OnInit {
   }
 
   initTable(): void {
+
+    TablaPeticiones['Dependencia'] =
+    {
+      ...TablaPeticiones['Dependencia'],
+      ...this.smartTableService.getProyectoCurricularConf()
+    }
+
+    TablaPeticiones['PagoMensual'] =
+    {
+      ...TablaPeticiones['PagoMensual'],
+      ...this.smartTableService.getDocumentoConf()
+    }
+
+    TablaPeticiones['NombrePersona'] =
+    {
+      ...TablaPeticiones['NombrePersona'],
+      ...this.smartTableService.getNombreConf()
+    }
+
+    TablaPeticiones['NumeroContrato'] =
+    {
+      ...TablaPeticiones['NumeroContrato'],
+      ...this.smartTableService.getNumeroContratoConf()
+    }
+
+    TablaPeticiones['Mes'] =
+    {
+      ...TablaPeticiones['Mes'],
+      ...this.smartTableService.getMesSolicitudConf()
+    }
+
+    TablaPeticiones['Ano'] =
+    {
+      ...TablaPeticiones['Ano'],
+      ...this.smartTableService.getAnioSolicitudConf()
+    }
+
     this.PeticionesOrdenadorSettings = {
       selectMode: 'multi',
-      columns: TablaPeticionesOrdenador,
+      columns: TablaPeticiones,
       mode: 'external',
       actions: {
         add: false,
@@ -92,47 +134,64 @@ export class AprobacionPagoComponent implements OnInit {
     this.Periodos[AnoProximo] = [AnoProximo + "-3", AnoProximo + "-1"]
   }
 
-  consultarNumeroDocumento(): void {
-    this.popUp.loading();
-    this.userService.user$.subscribe((data: any) => {
-      if (data && data.userService && data.userService.documento) {
-        this.DocumentoOrdenador = data.userService.documento;
-      }
-    });
-  }
-
-  consultarOrdenador(): void {
-    this.popUp.loading();
-    this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `ordenadores?query=Documento:${this.DocumentoOrdenador}&limit=0`).subscribe({
-      next: (response: any) => {
-        this.popUp.close();
-        this.NombreOrdenador = response[0].NombreOrdenador;
-      }, error: () => {
-        this.popUp.close();
-        this.popUp.error('No se ha podido consultar el Ordenador del gasto.')
-      }
-    });
-  }
-
-  consultarPeticiones(): void {
-    this.popUp.loading();
-    this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/solicitudes_ordenador/${this.DocumentoOrdenador}`).subscribe({
-      next: (response: Respuesta) => {
-        if (response.Success) {
-          this.popUp.close();
-          if (response.Data === null || (response.Data as any).length === 0) {
-            this.popUp.warning("No se encontraron peticiones para el Ordenador del Gasto.");
-          } else {
-            this.popUp.close();
-            this.PeticionesOrdenadorData = new LocalDataSource(response.Data);
-            this.SuscribeEventosData();
-
-          }
+  async consultarNumeroDocumento() {
+    return new Promise((resolve) => {
+      this.userService.user$.subscribe((data: any) => {
+        if (data && data.userService && data.userService.documento) {
+          this.DocumentoOrdenador = data.userService.documento;
+          resolve(undefined);
         }
-      }, error: () => {
-        this.popUp.close();
-        this.popUp.error("No existen peticiones asociadas al Ordenador.");
-      }
+        else {
+          this.popUp.error('No se ha podido consultar documento del Ordenador del gasto.')
+        }
+      });
+    });
+  }
+
+  async consultarOrdenador() {
+    return new Promise((resolve, reject) => {
+      this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `ordenadores?query=Documento:${this.DocumentoOrdenador}&limit=0`).subscribe({
+        next: (response: any) => {
+          if (response && response.length > 0) {
+            this.NombreOrdenador = response[0].NombreOrdenador;
+            resolve(undefined);
+          }
+          else{
+            this.popUp.error('No se ha podido obtener el Ordenador del gasto')
+          }
+        },
+        error: () => {
+          reject(
+            this.popUp.error('Error en peticion al consultar Ordenador del gasto')
+          )
+        }
+      });
+    });
+  }
+
+  async consultarPeticiones() {
+    return new Promise((resolve, reject) => {
+      this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/solicitudes_ordenador/${this.DocumentoOrdenador}`).subscribe({
+        next: (response: Respuesta) => {
+          if (response.Success) {
+            if (response.Data === null || (response.Data as any).length === 0) {
+              this.popUp.warning("No se encontraron peticiones para el Ordenador del Gasto.");
+            } else {
+              this.fixDataService.setDatos(response.Data);
+              let fixedData = this.fixDataService.getDatos();
+              this.PeticionesOrdenadorData = new LocalDataSource(fixedData);
+              this.SuscribeEventosData();
+              this.popUp.close();
+            }
+            resolve(undefined);
+          }
+        },
+        error: (error: any) => {
+          reject(
+            this.popUp.error("Error obteniendo peticiones del Ordenador del gasto")
+          )
+        }
+      });
     });
   }
 
@@ -141,6 +200,10 @@ export class AprobacionPagoComponent implements OnInit {
     this.PeticionesOrdenadorData.onChanged().subscribe(change => {
       switch (change.action) {
         case 'page':
+          this.CumplidosSelected = [];
+        case 'filter':
+          this.CumplidosSelected = [];
+        case 'sort':
           this.CumplidosSelected = [];
       }
     });
@@ -201,7 +264,9 @@ export class AprobacionPagoComponent implements OnInit {
   Aprobar(event): void {
     this.popUp.confirm("Aprobar", "¿Está seguro que desea aprobar el pago?", "aprobar").then(result => {
       if (result.isConfirmed) {
-        //VARIABLES
+        this.popUp.loading();
+
+        // VARIABLES
         var cumplido: any;
         var parametro: any;
 
@@ -362,6 +427,7 @@ export class AprobacionPagoComponent implements OnInit {
           })
           .catch(error => {
             this.popUp.error("Error al seleccionar cumplidos").then(() => {
+              this.ClearSelectedCumplidos();
               window.location.reload();
             });
             this.DeshabilitarBoton = true;
@@ -374,6 +440,7 @@ export class AprobacionPagoComponent implements OnInit {
     }
     else {
       if (event.isSelected) {
+        this.popUp.loading();
         //CONSULTA EL PARAMETRO
         this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:AP_DVE,Nombre:APROBACIÓN PAGO`).subscribe({
           next: (response: Respuesta) => {
@@ -388,7 +455,13 @@ export class AprobacionPagoComponent implements OnInit {
               cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
               cumplido.FechaModificacion = new Date();
               this.CumplidosSelected.push(cumplido);
+              this.popUp.close();
             }
+          }, error: () => {
+            this.popUp.error("Error obteniendo parametro").then(() => {
+              this.ClearSelectedCumplidos();
+              window.location.reload();
+            });
           }
         });
       } else {
@@ -418,6 +491,7 @@ export class AprobacionPagoComponent implements OnInit {
     } else {
       this.popUp.confirm("Aprobar Pagos", "¿Está seguro que desea aprobar el pago para las solicitudes de cumplidos seleccionadas?", "send").then(result => {
         if (result.isConfirmed) {
+          this.popUp.loading();
           this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/aprobar_pagos`, this.CumplidosSelected).subscribe({
             next: (response: Respuesta) => {
               if (response.Success) {
@@ -428,7 +502,12 @@ export class AprobacionPagoComponent implements OnInit {
                 });
               }
             }, error: () => {
-              this.popUp.error("No se ha podido aprobar los pagos de los cumplidos seleccionados.")
+              const cumplidosSeleccionadosInfo = this.CumplidosSelected.map(cumplido => `${cumplido.Persona}: ${cumplido.NumeroContrato}`).join('; ');
+              this.popUp.error(`No se ha podido aprobar los pagos de los cumplidos seleccionados: ${cumplidosSeleccionadosInfo}`).then(() => {
+                this.CumplidosSelected = [];
+                window.location.reload();
+              }
+              )
             }
           });
         }

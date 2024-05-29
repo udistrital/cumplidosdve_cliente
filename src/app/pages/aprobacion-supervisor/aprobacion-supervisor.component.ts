@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { LocalDataSource } from 'ng2-smart-table';
 import { Respuesta } from 'src/app/@core/models/respuesta';
-import { TablaPeticionesSupervisor } from 'src/app/@core/models/tabla_peticiones_supervisor';
+import { TablaPeticiones } from 'src/app/@core/models/tabla_peticiones';
 import { environment } from 'src/environments/environment';
 import { RequestManager } from '../services/requestManager';
 import { UserService } from '../services/userService';
 import { UtilService } from '../services/utilService';
-
+import { FixDataService } from 'src/app/@core/services/fix_data.service';
+import { SmartTableService } from 'src/app/@core/services/smart_table_service';
 @Component({
   selector: 'app-aprobacion-supervisor',
   templateUrl: './aprobacion-supervisor.component.html',
@@ -28,20 +29,58 @@ export class AprobacionSupervisorComponent implements OnInit {
     private request: RequestManager,
     private popUp: UtilService,
     private userService: UserService,
+    private fixDataService: FixDataService,
+    private smartTableService: SmartTableService
   ) {
     this.initTable();
   }
 
-  ngOnInit(): void {
-    this.consultarNumeroDocumento();
-    this.consultarSupervisor();
-    this.consultarPeticiones();
+  async ngOnInit(): Promise<void> {
+    this.popUp.loading();
+    await this.consultarNumeroDocumento();
+    await this.consultarSupervisor();
+    await this.consultarPeticiones();
   }
 
   initTable(): void {
+    TablaPeticiones['Dependencia'] =
+    {
+      ...TablaPeticiones['Dependencia'],
+      ...this.smartTableService.getProyectoCurricularConf()
+    }
+
+    TablaPeticiones['PagoMensual'] =
+    {
+      ...TablaPeticiones['PagoMensual'],
+      ...this.smartTableService.getDocumentoConf()
+    }
+
+    TablaPeticiones['NombrePersona'] =
+    {
+      ...TablaPeticiones['NombrePersona'],
+      ...this.smartTableService.getNombreConf()
+    }
+
+    TablaPeticiones['NumeroContrato'] =
+    {
+      ...TablaPeticiones['NumeroContrato'],
+      ...this.smartTableService.getNumeroContratoConf()
+    }
+
+    TablaPeticiones['Mes'] =
+    {
+      ...TablaPeticiones['Mes'],
+      ...this.smartTableService.getMesSolicitudConf()
+    }
+
+    TablaPeticiones['Ano'] =
+    {
+      ...TablaPeticiones['Ano'],
+      ...this.smartTableService.getAnioSolicitudConf()
+    }
     this.PeticionesSupervisorSettings = {
       selectMode: 'multi',
-      columns: TablaPeticionesSupervisor,
+      columns: TablaPeticiones,
       mode: 'external',
       actions: {
         add: false,
@@ -69,45 +108,65 @@ export class AprobacionSupervisorComponent implements OnInit {
     };
   }
 
-  consultarNumeroDocumento(): void {
-    this.popUp.loading();
-    this.userService.user$.subscribe((data: any) => {
-      if (data && data.userService && data.userService.documento) {
-        this.DocumentoSupervisor = data.userService.documento;
-      }
-    });
-  }
-
-  consultarSupervisor(): void {
-    this.popUp.loading();
-    this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `supervisor_contrato?query=Documento:${this.DocumentoSupervisor}&limit=0`).subscribe({
-      next: (response: any) => {
-        this.popUp.close();
-        this.NombreSupervisor = response[0].Nombre;
-      }, error: () => {
-        this.popUp.close();
-        this.popUp.error('No se ha podido consultar al coordinador.');
-      }
-    });
-  }
-
-  consultarPeticiones(): void {
-    this.popUp.loading();
-    this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/solicitudes_supervisor/${this.DocumentoSupervisor}`).subscribe({
-      next: (response: Respuesta) => {
-        if (response.Success) {
-          this.popUp.close();
-          if (response.Data == null || (response.Data as any).length === 0) {
-            this.popUp.warning("No se han encontrado peticiones para el supervisor.");
-          } else {
-            this.PeticionesSupervisorData = new LocalDataSource(response.Data)
-            this.SuscribeEventosData();
-          }
+  async consultarNumeroDocumento() {
+    return new Promise((resolve) => {
+      this.userService.user$.subscribe((data: any) => {
+        if (data && data.userService && data.userService.documento) {
+          this.DocumentoSupervisor = data.userService.documento;
+          resolve(undefined);
         }
-      }, error: () => {
-        this.popUp.close();
-        this.popUp.error("No existen peticiones asociadas al supervisor.");
-      }
+        else {
+          this.popUp.error('No se ha podido consultar documento del supervisor.')
+        }
+      });
+    });
+  }
+
+  async consultarSupervisor() {
+    return new Promise((resolve, reject) => {
+      this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `supervisor_contrato?query=Documento:${this.DocumentoSupervisor}&limit=0`).subscribe({
+
+        next: (response: any) => {
+          if (response && response.length > 0) {
+            this.NombreSupervisor = response[0].Nombre;
+            resolve(undefined);
+          }
+          else {
+            this.popUp.error('No se ha podido consultar al supervisor.')
+          }
+        },
+        error: () => {
+          reject(
+            this.popUp.error('Error en peticion al consultar al supervisor.')
+          )
+        }
+      });
+    });
+  }
+
+  async consultarPeticiones() {
+    return new Promise((resolve, reject) => {
+      this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/solicitudes_supervisor/${this.DocumentoSupervisor}`).subscribe({
+        next: (response: Respuesta) => {
+          if (response.Success) {
+            if (response.Data === null || (response.Data as any).length === 0) {
+              this.popUp.warning("No se encontraron peticiones para el Supervisor.");
+            } else {
+              this.fixDataService.setDatos(response.Data);
+              let fixedData = this.fixDataService.getDatos();
+              this.PeticionesSupervisorData = new LocalDataSource(fixedData);
+              this.SuscribeEventosData();
+              this.popUp.close();
+            }
+            resolve(undefined);
+          }
+        },
+        error: (error: any) => {
+          reject(
+            this.popUp.error("Error obteniendo peticiones del supervisor.")
+          )
+        }
+      });
     });
   }
 
@@ -116,6 +175,10 @@ export class AprobacionSupervisorComponent implements OnInit {
     this.PeticionesSupervisorData.onChanged().subscribe(change => {
       switch (change.action) {
         case 'page':
+          this.CumplidosSelected = [];
+        case 'fliter':
+          this.CumplidosSelected = [];
+        case 'sort':
           this.CumplidosSelected = [];
       }
     });
@@ -137,6 +200,7 @@ export class AprobacionSupervisorComponent implements OnInit {
   Aprobar(event): void {
     this.popUp.confirm("Aprobar", "¿Está seguro que desea dar el visto bueno a la solicitud de cumplido?", "aprobar").then(result => {
       if (result.isConfirmed) {
+        this.popUp.loading();
         //VARIABLES
         var cumplido: any;
         var parametro: any;
@@ -300,14 +364,17 @@ export class AprobacionSupervisorComponent implements OnInit {
                         resolve(undefined);
                       }
                     },
-                    error: (error) => {
-                      reject(error);
+                    error: () => {
+                      this.popUp.error(`No se ha podido consultar el ordenador del gasto, contrato: ${cumplido.PagoMensual.NumeroContrato}; docente: ${cumplido.PagoMensual.Persona}, ${cumplido.NombrePersona}`).then(() => {
+                        this.ClearSelectedCumplidos();
+                        window.location.reload();
+                      })
                     }
                   });
                 }
               },
-              error: (error) => {
-                reject(error);
+              error: () => {
+                this.popUp.error("Error obteniendo parametro");
               }
             });
           });
@@ -318,8 +385,9 @@ export class AprobacionSupervisorComponent implements OnInit {
             this.DeshabilitarBoton = false;
             this.popUp.close();
           })
-          .catch(error => {
+          .catch(() => {
             this.popUp.error("Error al seleccionar cumplidos").then(() => {
+              this.ClearSelectedCumplidos();
               window.location.reload();
             });
             this.DeshabilitarBoton = true;
@@ -332,8 +400,9 @@ export class AprobacionSupervisorComponent implements OnInit {
     }
     else {
       if (event.isSelected) {
+        this.popUp.loading();
         //GUARDA EL CUMPLIDO
-        cumplido = event.data.PagoMensual;
+        cumplido = event.data;
 
         //CONSULTA EL PARAMETRO
         this.request.get(environment.PARAMETROS_SERVICE, `parametro/?query=codigo_abreviacion:PAD_DVE,Nombre:POR APROBAR DECANO(A)`).subscribe({
@@ -345,27 +414,35 @@ export class AprobacionSupervisorComponent implements OnInit {
               }
 
               //CONSULTA AL ORDENADOR DEL GASTO
-              this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.NumeroContrato}/${cumplido.VigenciaContrato}`).subscribe({
+              this.request.get(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_pago/informacion_ordenador/${cumplido.PagoMensual.NumeroContrato}/${cumplido.PagoMensual.VigenciaContrato}`).subscribe({
                 next: (response: Respuesta) => {
                   if (response.Success) {
                     ordenador = String(response.Data.NumeroDocumento)
                     // ordenador = '52310001';
 
                     //CAMBIA EL ESTADO Y AJUSTA VALORES
-                    cumplido.Responsable = ordenador;
-                    cumplido.CargoResponsable = "ORDENADOR DEL GASTO";
-                    cumplido.EstadoPagoMensualId = parametro[0].Id;
-                    cumplido.FechaCreacion = new Date(cumplido.FechaCreacion);
-                    cumplido.FechaModificacion = new Date();
-                    this.CumplidosSelected.push(cumplido);
+                    cumplido.PagoMensual.Responsable = ordenador;
+                    cumplido.PagoMensual.CargoResponsable = "ORDENADOR DEL GASTO";
+                    cumplido.PagoMensual.EstadoPagoMensualId = parametro[0].Id;
+                    cumplido.PagoMensual.FechaCreacion = new Date(cumplido.FechaCreacion);
+                    cumplido.PagoMensual.FechaModificacion = new Date();
+                    this.CumplidosSelected.push(cumplido.PagoMensual);
+                    this.popUp.close();
                   }
+                }, error: () => {
+                  this.popUp.error(`No se ha podido consultar el ordenador del gasto, contrato: ${cumplido.PagoMensual.NumeroContrato}; docente: ${cumplido.PagoMensual.Persona}, ${cumplido.NombrePersona}`).then(() => {
+                    this.ClearSelectedCumplidos();
+                    window.location.reload();
+                  });
                 }
               });
-            } else {
-              this.popUp.error("Error al seleccionar cumplido").then(() => {
-                window.location.reload();
-              });
             }
+          },
+          error: () => {
+            this.popUp.error("Error obteniendo parametro").then(() => {
+              this.ClearSelectedCumplidos();
+              window.location.reload();
+            });
           }
         });
       } else {
@@ -398,6 +475,7 @@ export class AprobacionSupervisorComponent implements OnInit {
     } else {
       this.popUp.confirm("Aprobar Cumplidos", "¿Está seguro que desea dar el visto bueno a las solicitudes de cumplidos seleccionadas?", "send").then(result => {
         if (result.isConfirmed) {
+          this.popUp.loading();
           this.request.post(environment.CUMPLIDOS_DVE_MID_SERVICE, `aprobacion_documentos/aprobar_documentos`, this.CumplidosSelected).subscribe({
             next: (response: Respuesta) => {
               if (response.Success) {
@@ -408,7 +486,9 @@ export class AprobacionSupervisorComponent implements OnInit {
                 });
               }
             }, error: () => {
-              this.popUp.error("No se ha podido aprobar los cumplidos seleccionados.");
+              this.popUp.error("No se ha podido aprobar los cumplidos seleccionados.").then(() => {
+                window.location.reload();
+              });
             }
           });
         }

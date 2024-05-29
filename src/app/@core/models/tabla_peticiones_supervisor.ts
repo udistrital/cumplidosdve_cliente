@@ -7,12 +7,16 @@ export const TablaPeticionesSupervisor: any = {
         hide: true
     },
     Dependencia: {
-        title: 'Dependencia',
+        title: 'Proyecto Curricular',
         width: '15%',
         editable: false,
-        filter: false,
+        filter: true,
+        type: 'text',
         valuePrepareFunction: (data) => {
             return data.Nombre;
+        },
+        filterFunction: (data?: any, search?: string) => {
+            return data.Nombre.toLowerCase().includes(search.toLowerCase());
         }
     },
     PagoMensual: {
