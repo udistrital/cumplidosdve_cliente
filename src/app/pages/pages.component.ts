@@ -45,16 +45,10 @@ export class PagesComponent implements OnInit {
     });
   }
   ngOnInit(): void {
-    this.loaded = true;
-
-    this.userService.user$.subscribe((data: any)=> {
-      if(data?data.userService?data.userService.documento?true:false:false:false) {
-        this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `informacion_proveedor?query=NumDocumento:`+ data.userService.documento)
-        .subscribe((datosIdentificacion: DatosIdentificacion)=> {
-          let Nombre = datosIdentificacion[0].NomProveedor;
-          this.Name = Nombre;
-        })
+    this.userService.getUserName().then(
+      (nombre) => {
+        this.Name = nombre;
       }
-    })
+    ).then(() => { this.loaded = true; });
   }
 }
