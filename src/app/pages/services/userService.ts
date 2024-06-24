@@ -23,10 +23,10 @@ export class UserService {
         this.userSubject.next(dataUser);
     }
 
-    updateTercero(data) {
-      this.terceroData = {...this.terceroData, ...data}
-      this.terceroSubject.next(this.terceroData);
-    }
+  updateTercero(data) {
+    this.terceroData = { ...this.terceroData, ...data }
+    this.terceroSubject.next(this.terceroData);
+  }
 
   async getUserName(): Promise<string> {
     return new Promise<string>((resolve) => {
