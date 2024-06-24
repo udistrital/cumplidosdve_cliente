@@ -40,6 +40,7 @@ import { AprobacionCoordinadorComponent } from './aprobacion-coordinador/aprobac
 import { AprobacionSupervisorComponent } from './aprobacion-supervisor/aprobacion-supervisor.component';
 import { AprobacionPagoComponent } from './aprobacion-pago/aprobacion-pago.component';
 import { ModalDocumentViewerComponent } from './modal-document-viewer/modal-document-viewer.component';
+import { ReporteEstadoComponent } from './reporte-estado/reporte-estado.component';
 
 
 const pagesComponents = [
@@ -76,6 +77,7 @@ const materialModules = [
     AprobacionSupervisorComponent,
     AprobacionPagoComponent,
     ModalDocumentViewerComponent,
+    ReporteEstadoComponent,
   ],
   imports: [
     HttpClientModule,

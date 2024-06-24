@@ -1,0 +1,37 @@
+export const Meses = [{
+    "Mes": 1,
+    "Descripcion": "ENERO"
+  }, {
+    "Mes": 2,
+    "Descripcion": "FEBRERO"
+  }, {
+    "Mes": 3,
+    "Descripcion": "MARZO"
+  }, {
+    "Mes": 4,
+    "Descripcion": "ABRIL"
+  }, {
+    "Mes": 5,
+    "Descripcion": "MAYO"
+  }, {
+    "Mes": 6,
+    "Descripcion": "JUNIO"
+  }, {
+    "Mes": 7,
+    "Descripcion": "JULIO"
+  }, {
+    "Mes": 8,
+    "Descripcion": "AGOSTO"
+  }, {
+    "Mes": 9,
+    "Descripcion": "SEPTIEMBRE"
+  }, {
+    "Mes": 10,
+    "Descripcion": "OCTUBRE"
+  }, {
+    "Mes": 11,
+    "Descripcion": "NOVIEMBRE"
+  }, {
+    "Mes": 12,
+    "Descripcion": "DICIEMBRE"
+  }];

@@ -7,6 +7,7 @@ import { CreacionCumplidosDocenteComponent } from './creacion-cumplidos-docente/
 import { AprobacionCoordinadorComponent } from './aprobacion-coordinador/aprobacion-coordinador.component';
 import { AprobacionSupervisorComponent } from './aprobacion-supervisor/aprobacion-supervisor.component';
 import { AprobacionPagoComponent } from './aprobacion-pago/aprobacion-pago.component';
+import { ReporteEstadoComponent } from './reporte-estado/reporte-estado.component';
 
 const routes: Routes = [{
   path: '',
@@ -38,6 +39,10 @@ const routes: Routes = [{
     {
       path: 'aprobacion_pago',
       component: AprobacionPagoComponent,
+    },
+    {
+      path: 'reporte_estado',
+      component: ReporteEstadoComponent,
     }
   ]
     

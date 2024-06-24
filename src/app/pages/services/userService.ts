@@ -28,20 +28,6 @@ export class UserService {
     this.terceroSubject.next(this.terceroData);
   }
 
-  async getUserName(): Promise<string> {
-    return new Promise<string>((resolve) => {
-      this.user$.subscribe((data: any) => {
-        if (data ? data.userService ? data.userService.documento ? true : false : false : false) {
-          this.request.get(environment.ADMINISTRATIVA_AMAZON_SERVICE, `informacion_proveedor?query=NumDocumento:` + data.userService.documento)
-            .subscribe((datosIdentificacion: DatosIdentificacion) => {
-              let nombre = datosIdentificacion[0].NomProveedor;
-              resolve(nombre);
-            })
-        }
-      })
-    })
-  }
-
   getAllTercero() {
 
   }
