@@ -169,11 +169,7 @@ export class ReporteEstadoComponent implements OnInit {
               if (response.Data === null || (response.Data as any).length === 0) {
                 this.popUp.warning("No se encontraron peticiones para el coordinador.");
               } else {
-                // this.fixDataService.setDatos(response.Data);
-                // let fixedData = this.fixDataService.getDatos();
-                // this.PeticionesData = new LocalDataSource(fixedData);
-                // this.SuscribeEventosData();
-                // this.popUp.close();
+       
               }
               resolve(undefined);
             }
