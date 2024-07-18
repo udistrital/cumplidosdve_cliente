@@ -1,8 +1,5 @@
 import { BehaviorSubject } from 'rxjs';
 import { Injectable } from '@angular/core';
-import { RequestManager } from './requestManager';
-import { environment } from 'src/environments/environment';
-import { DatosIdentificacion } from 'src/app/@core/models/datos_identificacion';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +13,6 @@ export class UserService {
     public terceroData: any = {}
 
   constructor(
-    private request: RequestManager,
   ) { }
 
     updateUser(dataUser) {

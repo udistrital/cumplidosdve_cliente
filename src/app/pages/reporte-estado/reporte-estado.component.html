@@ -10,34 +10,34 @@
             </mat-form-field>
         </div>
 
-        <form>
+        <form [formGroup]="formularioReporte" (ngSubmit)="consultarCumplidos()">
             <mat-form-field class="form-proyecto-curricular">
                 <mat-label>FACULTAD</mat-label>
-                <mat-select [(value)]="facultadSeleccionada" (valueChange)="obtenerProyectos()">
+                <mat-select formControlName="facultad" (selectionChange)="obtenerProyectos($event.value)">
                     <mat-option [value]="facultad" *ngFor="let facultad of facultades">{{facultad.Nombre}}</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field class="form-proyecto-curricular">
                 <mat-label>PROYECTO CURRICULAR</mat-label>
-                <mat-select [(value)]="proyectoSeleccionado">
-                    <mat-option [value]="proyecto" *ngFor="let proyecto of proyectos">{{proyecto}}</mat-option>
+                <mat-select formControlName="proyecto">
+                    <mat-option [value]="proyecto" *ngFor="let proyecto of proyectos">{{proyecto.Nombre}}</mat-option>
                 </mat-select>
             </mat-form-field>
             <div class="form-time">
                 <mat-form-field appearance="outline">
                     <mat-label>VIGENCIA</mat-label>
-                    <mat-select [(value)]="vigenciaSeleccionada">
-                        <mat-option [value]="vigencia" *ngFor="let vigencia of vigencias">{{vigencia}}</mat-option>
+                    <mat-select formControlName="vigencia">
+                        <mat-option [value]="vigencia" *ngFor="let vigencia of vigencias">{{vigencia}} </mat-option>
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                     <mat-label>MES</mat-label>
-                    <mat-select [(value)]="mesSeleccionado">
+                    <mat-select formControlName="mes">
                         <mat-option [value]="mes" *ngFor="let mes of meses">{{mes.Descripcion}}</mat-option>
                     </mat-select>
                 </mat-form-field>
             </div>
-            <button mat-raised-button class="send" (click)="consultarCumplidos()">Consultar</button>
+            <button mat-raised-button class="send">Consultar</button>
         </form>
         <div class="table">
             <mat-card class="card-oas">
@@ -45,7 +45,7 @@
                     <h3>Cumplidos</h3>
                 </mat-card-title>
                 <mat-card-content>
-                    <ng2-smart-table [settings]="peticionesSettings" [source]="PeticionesData"></ng2-smart-table>
+                    <ng2-smart-table [settings]="peticionesSettings" [source]="peticionesData"></ng2-smart-table>
                 </mat-card-content>
             </mat-card>
         </div>

@@ -90,11 +90,53 @@ export class SmartTableService {
         };
     }
 
+    public getEstadoSolicitudConf() {
+        return {
+            valuePrepareFunction: (cell?: any) => {
+                return this.prepareFunctionEstadoSolicitud(cell)
+            },
+            filterFunction: (cell?: any, search?: string): boolean => {
+                return this.filterFunctionEstadoSolicitud(cell, search);
+            },
+            compareFunction: (direction: any, a: any, b: any): number => {
+                return this.compareFunctionEstadoSolicitud(direction, a, b);
+            },
+        };
+    }
+
+    public getDocumentoResponsableConf() {
+        return {
+            valuePrepareFunction: (cell?: any) => {
+                return this.prepareFunctionDocumentoResponsable(cell)
+            },
+            filterFunction: (cell?: any, search?: string): boolean => {
+                return this.filterFunctionDocumentoResponsable(cell, search);
+            },
+            compareFunction: (direction: any, a: any, b: any): number => {
+                return this.compareFunctionDocumentoResponsable(direction, a, b);
+            },
+        };
+    }
+
+    public getNombreResponsableConf() {
+        return {
+            valuePrepareFunction: (cell?: any) => {
+                return this.prepareFunctionNombreResponsable(cell)
+            },
+            filterFunction: (cell?: any, search?: string): boolean => {
+                return this.filterFunctionNombreResponsable(cell, search);
+            },
+            compareFunction: (direction: any, a: any, b: any): number => {
+                return this.compareFunctionNombreResponsable(direction, a, b);
+            },
+        };
+    }
+
     private prepareFunctionProyectoCurricular(value?: any) {
         if (!value) {
             return '';
         }
-        return value.Nombre
+        return value
     }
 
 
@@ -150,7 +192,7 @@ export class SmartTableService {
         if (!value) {
             return '';
         }
-        return value.Persona
+        return value
     }
 
     private compareFunctionDocumento(direction: any, a: any, b: any) {
@@ -249,6 +291,89 @@ export class SmartTableService {
             return false;
         }
         if ((value.toString().toUpperCase()).indexOf(search.toUpperCase()) > -1) {
+            return true;
+        }
+        return false;
+    }
+
+
+    private prepareFunctionEstadoSolicitud(value?: any) {
+        if (!value) {
+            return '';
+        }
+        return value
+    }
+
+    private compareFunctionEstadoSolicitud(direction: any, a: any, b: any) {
+        const first = this.prepareFunctionEstadoSolicitud(a);
+        const second = this.prepareFunctionEstadoSolicitud(b);
+        return this.getOrder(first, second, direction);
+    }
+
+    private filterFunctionEstadoSolicitud(cell?: any, search?: string): boolean {
+        if (!search.length) {
+            return false;
+        }
+        const value = this.prepareFunctionEstadoSolicitud(cell);
+        if (!value) {
+            return false;
+        }
+        if ((value.toUpperCase()).indexOf(search.toUpperCase()) > -1) {
+            return true;
+        }
+        return false;
+    }
+
+    private prepareFunctionDocumentoResponsable(value?: any) {
+        if (!value) {
+            return '';
+        }
+        return value
+    }
+
+    private compareFunctionDocumentoResponsable(direction: any, a: any, b: any) {
+        const first = this.prepareFunctionDocumentoResponsable(a);
+        const second = this.prepareFunctionDocumentoResponsable(b);
+        return this.getOrder(first, second, direction);
+    }
+
+    private filterFunctionDocumentoResponsable(cell?: any, search?: string): boolean {
+        if (!search.length) {
+            return false;
+        }
+        const value = this.prepareFunctionDocumentoResponsable(cell);
+        if (!value) {
+            return false;
+        }
+        if ((value).indexOf(search) > -1) {
+            return true;
+        }
+        return false;
+    }
+
+    private prepareFunctionNombreResponsable(value?: any) {
+        if (!value) {
+            return '';
+        }
+        return value
+    }
+
+
+    private compareFunctionNombreResponsable(direction: any, a: any, b: any) {
+        const first = this.prepareFunctionNombre(a);
+        const second = this.prepareFunctionNombre(b);
+        return this.getOrder(first, second, direction);
+    }
+
+    private filterFunctionNombreResponsable(cell?: any, search?: string): boolean {
+        if (!search.length) {
+            return false;
+        }
+        const value = this.prepareFunctionNombreResponsable(cell);
+        if (!value) {
+            return false;
+        }
+        if ((value.toUpperCase()).indexOf(search.toUpperCase()) > -1) {
             return true;
         }
         return false;

@@ -4,45 +4,55 @@ export const TablaPeticionesReporte: any = {
     },
     ProyectoCurricular: {
         title: 'Proyecto Curricular',
-        width: '15%',
+        width: '11%',
         editable: false,
         filter: true,
-        type: 'text'
     },
-    PagoMensual: {
+    Documento: {
         title: 'Documento',
-        width: '10%',
+        width: '11%',
         editable: false,
         filter: true,
-        type: 'text'
     },
     NombrePersona: {
         title: 'Nombre Profesor',
-        width: '20%',
+        width: '12%',
         editable: false,
         filter: true
     },
     NumeroContrato: {
         title: 'Número Contrato',
-        width: '15%',
+        width: '11%',
         editable: false,
         filter: true
     },
     Mes: {
         title: 'Mes Solicitud',
-        width: '15%',
+        width: '11%',
         editable: false,
         filter: true
     },
     Ano: {
         title: 'Año Solicitud',
-        width: '15%',
+        width: '11%',
         editable: false,
         filter: true
     },
     Estado: {
         title: 'Estado',
-        width: '15%',
+        width: '11%',
+        editable: false,
+        filter: true
+    },
+    DocumentoResponsable: {
+        title: 'Documento Responsable',
+        width: '11%',
+        editable: false,
+        filter: true
+    },
+    NombreResponsable: {
+        title: 'Nombre Responsable',
+        width: '11%',
         editable: false,
         filter: true
     }
